@@ -18,6 +18,5 @@ class EmailHandler(InboundMailHandler):
 
     def forward_email(self, recipient, owner):
         
-
         
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)

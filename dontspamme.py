@@ -14,11 +14,10 @@ class MainPage(webapp.RequestHandler):
         if not user:
             self.redirect(users.create_login_url(self.request.uri))
         
-        pseudonyms = db.GqlQuery("SELECT * FROM Pseudonym WHERE user = :user ORDER BY created ASC",
-            user=user)
+        pseudos = Pseudonym.user_pseudonyms(user)
         
         self.response.out.write('<html><body>')
-        for pseudo in pseudonyms:
+        for pseudo in pseudos:
             self.response.out.write(cgi.escape(pseudo.user.nickname() + ' ' + pseudo.mask + '@dontspam.me ' + pseudo.domain + ' ' + str(pseudo.created)) + "<br>")
         
         # Write the submission form and the footer of the page
