@@ -1,0 +1,15 @@
+application: dontspamme
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /.*
+  script: dontspamme.py
+  
+- url: /_ah/mail/.+ 
+  script: mail.py 
+  login: admin
+
+inbound_services:
+- mail
