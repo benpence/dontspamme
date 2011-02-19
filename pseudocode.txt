@@ -1,0 +1,62 @@
+MAIN(user)
+    if user in admins
+        CREATE PSEUDO
+        PSEUDO PREFERENCES
+        CREATE/REMOVE USERS
+        SAVE CHANGES
+    
+    else if user in users
+        CREATE PSEUDO
+        PSEUDO PREFERENCES
+        SAVE CHANGES
+    
+    else
+        redirect(dontspam.me)
+
+PREFERENCES PER PSEUDO
+    [tags]
+    X delete
+    ? enable
+	? block all non valids
+	? notify on non valids
+
+GENERATE(user, domain)
+    pseudo = Pseudo()
+    
+    pseudo.owner = user.email
+    pseudo.pseudo = generate_pseudo()
+    pseudo.domain = domain
+
+CHANGES(post)
+    
+
+MAIL(message)
+	pseudo = search_pseudo(message.to)
+	tag = get_tag(message.to)
+
+    # To no one
+	if not pseudo
+		discard
+		
+	# Outward
+	if tag 
+	    # Response
+    	if message.from is pseudo.owner
+    		domain = 
+    	
+    # Inwards
+	else
+	    domain = get_domain(message.from)
+	    
+	    # Create tag for email
+	    pseudo.tag = create_tag_if_needed(message.from)
+	    
+	    # Valid receipt
+		if domain in pseudo.domain or pseudo.domain in domain 
+		    send_message(to=pseudo.owner, tag=pseudo.tag, message=message, valid=True)
+
+		# Invalid receipt
+		else
+		    send_message(to=pseudo.owner, tag=pseudo.tag, message=message, valid=False)
+
+

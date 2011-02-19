@@ -1,11 +1,21 @@
-_HASH_LENGTH = 12
-
 import random
 random.seed()
 
-def random_hash():
+def random_hash(length):
     """
-    None -> str
+    length:int -> str
+    
+    Return random hash with 'length' characters
     """
     
-    return "%x" % random.getrandbits(_HASH_LENGTH * 4)
+    return "%x" % random.getrandbits(length * 4)
+    
+    
+def first(l, f):
+    """
+    l:[_] | f:function -> _ or None
+    
+    Get first item in l that satisfies f(item) or None
+    """
+    
+    return next((n for n in l if f(n)), None)
