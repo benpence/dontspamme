@@ -22,7 +22,6 @@ class Address(db.Model):
     def __init__(self):
         tag = self.generate_tag()
     
-    @classmethod
-    def generate_tag(self):
+    def email_to_tag(self):
         # CHECK IF ALREADY IN DATABASE
         pass

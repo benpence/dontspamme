@@ -19,3 +19,11 @@ def first(l, f):
     """
     
     return next((n for n in l if f(n)), None)
+    
+def email_split(email, start='', end=''):
+    partition = email[email.rfind(start): email.rfind(end)]
+
+    if not partition:
+        return None
+
+    return partition[1:]
