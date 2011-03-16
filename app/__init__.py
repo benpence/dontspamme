@@ -1,3 +1,5 @@
+import exception
+
 import random
 random.seed()
 
@@ -13,10 +15,14 @@ def random_hash(length):
     
 def first(l, f):
     """
-    l:[_] | f:function -> _ or None
+    l:list | f:function -> _ or None
     
     Get first item in l that satisfies f(item) or None
     """
+    
+    """TODO: Look up cheking for iterables and functions"""
+    if not (isinstance(l, list)):# or not isinstance(f, callable):
+        raise exception.InputError("list, function") 
     
     return next((n for n in l if f(n)), None)
     
