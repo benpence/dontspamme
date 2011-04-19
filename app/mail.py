@@ -3,9 +3,8 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 from google.appengine.ext import webapp 
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from model import Pseudonym
-import common
-import config
+import model
+import ext
 
 class EmailHandler(InboundMailHandler):
     """
@@ -13,86 +12,114 @@ class EmailHandler(InboundMailHandler):
     """
     
     def receive(self, message):
-        pseudo = Pseudonym.search_by_to(mail_message.get('to'))
-        tag = self.get_tag(message.get('to'))
-        
-        # To no one important
-        if not pseudo:
-            """DISCARD MESSAGE"""
-        
-        # Sent from user
-        if tag:
-            self.from_owner(message, pseudo, tag)
-            
-        # Sent from somebody else
-        else:
-            self.to_owner(message, pseudo)
-                     
-    def from_owner(self, message, pseudo, tag):
         """
-        message:{str:...} | pseudo:Pseudonym | tag:str -> None
-        
-        Tag specified; response from owner
-        """
-        
-        # Sender not owner
-        if message.get('from') is not psuedo.owner:
-            """DISCARD MESSAGE"""
-            
-        address = Address.search_by_tag(tag)
-        
-        # Invalid tag
-        if not address:
-            """DISCARD MESSAGE"""
-        
-        # Send message
-        self.send(
-            message=message,
-            to=address.email,
-            from=pseudo.mask)
+        Interace 
 
-    def to_owner(self, message, pseudo):
         """
-        message:{str:...} | pseudo:Pseudonym -> None
+        sender = message.get('from')
+        receiver = message.get('to')
+
+        # Email from somebody?
+        pseudo = ext.where(model.Pseudonym, 1, email=receiver)
+
+        if pseudo:
+            self.fromStranger(pseudo, sender, message)
         
-        No tag specified; email to owner
+
+        # Reply from user?
+        tag = self.getTag(receiver)
+        pseudo = ext.where(model.Pseudonym, 1, email=sender)
+
+        if tag and pseudo:
+            self.fromUser(pseudo, tag, message)
+
+        # To non-existent user -> do not relay
+
+    def fromStranger(self, pseudo, sender, message):
+        """
+        Stranger emailing a pseudonym
+        New strangers will be added as Contact.
+        Strangers sending from invalid domain will be flagged.
+
+        Args:
+            pseudo: Pseudonym of user
+            sender: stranger email address
+            message: dictionary message
         """
 
-        # Will create entry if necessary
-        tag = Address.email_to_tag(
-            pseudo.owner,
-            message.get('from'))
+        tag = ext.where(
+            model.Contact
+            1,
+            email=sender
+        )
 
-        domain = self.get_domain(message.get('from'))
+        # Create entry if new
+        if not tag:
+            tag = model.Contact(
+                psuedo=pseudo,
+                """TODO: Write method to generate tags"""
+                email=sender,
+            )
+
+
+        domain = self.getDomain(sender)
 
         # Send response
         self.send(
-            message=self.sanitize_message(
-                message
-                valid=domain in pseudo.domain or pseudo.domain in domain),
-            to=pseudo.owner,
-            from=pseudo.mask+config.domain_name)
+            """TODO: Write all cool stuff into message body-header for marking-as-spam etc"""
+            message,
+            pseudo.user.email(),
+            """TODO: Write function to insert tag into reply-to address"""
+            pseudo.mask+config.domain_name,
+        )
+
+    def fromUser(self, pseudo, tag, message):
+        """
+        Send reply to contact.
+        Sanitize message, verify contact tag, send email to contact.
+        
+        Args:
+            pseudo: Pseudonym of user
+            sender: stranger email address
+            message: dictionary message
+        """
+        contact = ext.where(model.Contact, 1, tag=tag)
+        
+        # Invalid tag
+        if not contact:
+            """TODO: Should we warn user that they have sent invalid tag?"""
+            return
+        
+        # Send message
+        self.send(
+            self.sanitize(message),
+            contact.email,
+            pseudo.mask+config.domain_name,
+        )
                 
-    def sanitize_message(self, message, valid=True):
+    def sanitizeMessage(self, message):
         """
-        message:{str:...} | valid:bool -> {str:str}
+        Remove all traces of User's REAL email address from message body.
         """
+
+        """TODO: Write sanitization"""
         
         return message
 
-    def send(self, message=None, to=None, from=None):
+    def send(self, message, receiver, sender):
         """
-        message:{str:...} | to:str | from:str -> None
+        Send an email
         """
 
-        # Logging
-        if not (message and to and from):
-            """LOG"""
+        """TODO: Implement sending of email..."""
+
+        if not (message and receiver and sender):
+            raise exception.InputError()
                 
-    def get_tag(self, to):
-        return common.email_split(to, start='+', end='@')
+    def getTag(self, email):
+        return ext.email_split(email, '+', '@')
         
-    def get_domain(self, to):
-        return common.email_split(to, start='@')
+    def getDomain(self, email):
+        return ext.email_split(email, '@')
         
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)

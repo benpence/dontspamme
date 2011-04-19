@@ -3,7 +3,7 @@ import exception
 import random
 random.seed()
 
-def random_hash(length):
+def randomHash(length):
     """
     Return random hash with 'length' characters
 
@@ -27,7 +27,7 @@ def first(l, f):
     
     return next((n for n in l if f(n)), None)
     
-def email_split(email, start='', end=''):
+def emailSplit(email, start='', end=''):
     """
     Returns rightmost string that is contained by start and end.
     """
@@ -37,3 +37,16 @@ def email_split(email, start='', end=''):
         return None
 
     return partition[1:]
+
+def where(cls, count=0, **kwargs):
+    results = cls.gql(
+        "WHERE %s" % ' AND '.join(
+            ("%s = :%s" % (key, key) for key in kwargs)
+        ),
+        **kwargs
+    )
+
+    if count:
+        return results.fetch(count)
+
+    return results

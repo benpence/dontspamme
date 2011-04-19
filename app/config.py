@@ -1,1 +1,1 @@
-domain_name = "dontspam.me"
+domain_name = "@dontspam.me"

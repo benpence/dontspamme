@@ -41,18 +41,6 @@ class Pseudonym(db.Model):
     flag        = db.BooleanProperty()
     
     created     = db.DateTimeProperty(auto_now_add=True)
-    
-    @classmethod
-    def userToPseudonym(cls, user):
-        pseudos = cls.gql(
-            "WHERE user = :user",
-            user=user
-        )
-
-        if not pseudos:
-            raise exception.EmptyQueryError("No pseudonyms for user" + str(user))
-
-        return pseudos[0]
             
 class Contact(db.Model):
     """
