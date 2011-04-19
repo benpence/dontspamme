@@ -9,9 +9,10 @@ def random_hash(length):
     
     Return random hash with 'length' characters
     """
+
+    """TODO: Evaluate different random functions in python by efficiency. Collision resistance is quite unimportant though"""
     
     return "%x" % random.getrandbits(length * 4)
-    
     
 def first(l, f):
     """
@@ -20,7 +21,7 @@ def first(l, f):
     Get first item in l that satisfies f(item) or None
     """
     
-    """TODO: Look up cheking for iterables and functions"""
+    """TODO: Look up checking for iterables and functions"""
     if not (isinstance(l, list)):# or not isinstance(f, callable):
         raise exception.InputError("list, function") 
     

@@ -7,9 +7,8 @@ class Error(Exception):
 
 class InputError(Error):
     """
-    Called when a function's input is 
+    Called when a function's input is invalid so we can nip problems in the bud without tracing down stupid errors.
     """
     
     def __str__(self):
         return 'Invalid input arguments. Expects (' + self.value + ')'
-        
