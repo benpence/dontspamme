@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 
-class Users(db.Model):
+class User(db.Model):
     """
     A user associated with this app. Primary function is to disallow other users from using app.
 
