@@ -7,8 +7,13 @@ class Error(Exception):
 
 class InputError(Error):
     """
-    Called when a function's input is invalid so we can nip problems in the bud without tracing down stupid errors.
+    A function's input is invalid so we can nip problems in the bud without tracing down stupid errors.
     """
     
     def __str__(self):
         return 'Invalid input arguments. Expects (' + self.value + ')'
+
+class EmptyQueryError(Error):
+    """
+    The datastore has returned nothing, even though there totally should be something.
+    """

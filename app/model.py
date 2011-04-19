@@ -3,7 +3,8 @@ from google.appengine.ext import db
 import ext
 
 class Users(db.Model):
-    """A user associated with this app. Primary function is to disallow other users from using app.
+    """
+    A user associated with this app. Primary function is to disallow other users from using app.
 
     Attributes:
         user: Google user
@@ -11,17 +12,17 @@ class Users(db.Model):
             True  -> can add and remove users
             False -> cannot add/remove
     """
-
     user        = db.UserProperty()
-    isAdmin     = db.StringProperty(multiline=False)
+    isAdmin     = db.BooleanProperty()
 
 class Pseudonym(db.Model):
-    """A pseudonym (mask) for a user.
+    """
+    A pseudonym (mask) for a user.
 
     Attributes:
         user: Owner of pseudonym
         mask: Pseudonym string. example: a38g70a@mycrazyapp.appspot.com
-        domains: Legitimate domain(s). Filled in on creation.
+        domain/domains: Legitimate domain(s).
         contact/contacts: Collection of contacts associated with this pseudonym
         flag: boolean
             True  -> flag emails from invalid contacts
@@ -41,24 +42,34 @@ class Pseudonym(db.Model):
     created     = db.DateTimeProperty(auto_now_add=True)
     
     @classmethod
-    def user_pseudonyms(cls, user):
-        return cls.gql(
+    def userToPseudonym(cls, user):
+        pseudos = cls.gql(
             "WHERE user = :user ORDER BY created ASC",
             user=user
         )
+
+        if not pseudos:
+            return None
+
+        return pseudos[0]
             
 class Contact(db.Model):
     """
     A mapping of a hashstring -> email address.
     Allows the user of the Pseudonym to indicate to whom they are responding.
+
+    Attributes:
+        pseudo: Pseudonym object. Represents who this is a contact for.
+        tag: str that maps to the email of the contact
+        email: the email of the contact
     """
 
     """TODO: Allow user of Pseudonym to initiate an email conversation. While this is not what the tool was intended for, it should be possible."""
     """TODO: Look into encrypting email mappings for Addresses on the server. Then again, maybe not."""
 
-    pseudo = db.ReferenceProperty(Pseudonym, collection_name='tags')
-    tag = db.StringProperty(multiline=False)
-    address = db.StringProperty(multiline=False)
+    pseudo      = db.ReferenceProperty(Pseudonym)
+    tag         = db.StringProperty(multiline=False)
+    address     = db.StringProperty(multiline=False)
 
     def emailToTag(self):
         pass
