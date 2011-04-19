@@ -1,6 +1,7 @@
 from google.appengine.ext import db
 
 import ext
+import exception
 
 class Users(db.Model):
     """
@@ -44,12 +45,12 @@ class Pseudonym(db.Model):
     @classmethod
     def userToPseudonym(cls, user):
         pseudos = cls.gql(
-            "WHERE user = :user ORDER BY created ASC",
+            "WHERE user = :user",
             user=user
         )
 
         if not pseudos:
-            return None
+            raise exception.EmptyQueryError("No pseudonyms for user" + str(user))
 
         return pseudos[0]
             
@@ -69,8 +70,21 @@ class Contact(db.Model):
 
     pseudo      = db.ReferenceProperty(Pseudonym)
     tag         = db.StringProperty(multiline=False)
-    address     = db.StringProperty(multiline=False)
+    email       = db.StringProperty(multiline=False)
 
-    def emailToTag(self):
-        pass
-        """CHECK IF ALREADY IN DATABASE"""
+    @classmethod
+    def emailToTag(cls, pseudo, email):
+        """
+        Lookup contact email by sender (user) and received tag.
+        User is replying to contact's email.
+        """
+        tags = cls.gql(
+            "WHERE pseudo = :pseudo AND email = :email",
+            pseudo=pseudo,
+            email=email,
+        )
+
+        if not tags:
+            raise exception.EmptyQueryError("No tags for email" + email)
+
+        return tags[0]
