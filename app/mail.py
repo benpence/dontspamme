@@ -4,38 +4,39 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 import model
-import ext
+import config
 
 class EmailHandler(InboundMailHandler):
     """
     Calls 'receive' method when an email is sent to STRING@APP_NAME.appspot.com
+
+    Tutorial: http://code.google.com/appengine/docs/python/mail/
     """
     
     def receive(self, message):
         """
-        Interace 
-
+        Main API function. Called when message received.
         """
-        sender = message.get('from')
-        receiver = message.get('to')
+        sender = message.sender
+        to = message.to
 
         # Email from somebody?
-        pseudo = ext.where(model.Pseudonym, 1, email=receiver)
+        pseudo = model.where(model.Pseudonym, 1, email=to)
 
         if pseudo:
-            self.fromStranger(pseudo, sender, message)
+            self.from_stranger(pseudo, sender, message)
         
 
         # Reply from user?
-        tag = self.getTag(receiver)
-        pseudo = ext.where(model.Pseudonym, 1, email=sender)
+        tag = self.email_split(to, '+', '@')
+        pseudo = model.where(model.Pseudonym, 1, email=sender)
 
         if tag and pseudo:
-            self.fromUser(pseudo, tag, message)
+            self.from_user(pseudo, tag, message)
 
         # To non-existent user -> do not relay
 
-    def fromStranger(self, pseudo, sender, message):
+    def from_stranger(self, pseudo, sender, message):
         """
         Stranger emailing a pseudonym
         New strangers will be added as Contact.
@@ -47,8 +48,8 @@ class EmailHandler(InboundMailHandler):
             message: dictionary message
         """
 
-        tag = ext.where(
-            model.Contact
+        tag = model.where(
+            model.Contact,
             1,
             email=sender
         )
@@ -57,23 +58,21 @@ class EmailHandler(InboundMailHandler):
         if not tag:
             tag = model.Contact(
                 psuedo=pseudo,
-                """TODO: Write method to generate tags"""
-                email=sender,
+                # TODO: Write method to generate tags
+                email=sender
             )
 
-
-        domain = self.getDomain(sender)
+        domain = self.email_split(sender, '@')
 
         # Send response
-        self.send(
-            """TODO: Write all cool stuff into message body-header for marking-as-spam etc"""
-            message,
-            pseudo.user.email(),
-            """TODO: Write function to insert tag into reply-to address"""
-            pseudo.mask+config.domain_name,
-        )
+        self.prepare_message(message)
+        message.to = pseudo.user.email()
+        # TODO: Write function to insert tag into reply-to address
+        message.reply_to = pseudo.mask+config.domain_name
 
-    def fromUser(self, pseudo, tag, message):
+        message.send()
+
+    def from_user(self, pseudo, tag, message):
         """
         Send reply to contact.
         Sanitize message, verify contact tag, send email to contact.
@@ -83,43 +82,45 @@ class EmailHandler(InboundMailHandler):
             sender: stranger email address
             message: dictionary message
         """
-        contact = ext.where(model.Contact, 1, tag=tag)
+        contact = model.where(model.Contact, 1, tag=tag)
         
         # Invalid tag
         if not contact:
-            """TODO: Should we warn user that they have sent invalid tag?"""
+            # TODO: Should we warn user that they have sent invalid tag?
             return
         
         # Send message
-        self.send(
-            self.sanitize(message),
-            contact.email,
-            pseudo.mask+config.domain_name,
-        )
+        self.sanitize(message, pseudo.user.email())
+        message.sender = pseudo.mask + config.domain_name
+        message.to = contact.email,
+
+        message.send()
                 
-    def sanitizeMessage(self, message):
+    def prepare_message(self, message):
+        """
+        Add header to message body.
+        """
+
+        # TODO: Implement preparation of message
+        pass
+
+    def sanitize_message(self, message, email):
         """
         Remove all traces of User's REAL email address from message body.
         """
 
-        """TODO: Write sanitization"""
-        
-        return message
+        # TODO: Write sanitization
+        pass
 
-    def send(self, message, receiver, sender):
+    def email_split(email, start='', end=''):
         """
-        Send an email
+        Returns rightmost string that is contained by start and end.
         """
+        partition = email[email.rfind(start): email.rfind(end)]
 
-        """TODO: Implement sending of email..."""
+        if not partition:
+            return None
 
-        if not (message and receiver and sender):
-            raise exception.InputError()
-                
-    def getTag(self, email):
-        return ext.email_split(email, '+', '@')
-        
-    def getDomain(self, email):
-        return ext.email_split(email, '@')
+        return partition[1:]
         
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)

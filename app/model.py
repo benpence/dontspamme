@@ -31,7 +31,8 @@ class Pseudonym(db.Model):
         created: datetime of creation time
     """
     
-    """TODO: Decide if domain should be references to Contacts. The only problem is the wildcard. How do I handle that?"""
+    # TODO: Decide if domain should be references to Contacts. 
+    # The only problem is the wildcard. How do I handle that?
 
     user        = db.UserProperty()
     mask        = db.StringProperty(multiline=False)
@@ -53,26 +54,24 @@ class Contact(db.Model):
         email: the email of the contact
     """
 
-    """TODO: Allow user of Pseudonym to initiate an email conversation. While this is not what the tool was intended for, it should be possible."""
-    """TODO: Look into encrypting email mappings for Addresses on the server. Then again, maybe not."""
+    # TODO: Allow user of Pseudonym to initiate an email conversation.
+    # While this is not what the tool was intended for, it should be possible.
+    
+    # TODO: Look into encrypting email mappings for Addresses on the server. Then again, maybe not.
 
     pseudo      = db.ReferenceProperty(Pseudonym)
     tag         = db.StringProperty(multiline=False)
     email       = db.StringProperty(multiline=False)
 
-    @classmethod
-    def emailToTag(cls, pseudo, email):
-        """
-        Lookup contact email by sender (user) and received tag.
-        User is replying to contact's email.
-        """
-        tags = cls.gql(
-            "WHERE pseudo = :pseudo AND email = :email",
-            pseudo=pseudo,
-            email=email,
-        )
+def where(cls, count=0, **kwargs):
+    results = cls.gql(
+        "WHERE %s" % ' AND '.join(
+            ("%s = :%s" % (key, key) for key in kwargs)
+        ),
+        **kwargs
+    )
 
-        if not tags:
-            raise exception.EmptyQueryError("No tags for email" + email)
+    if count:
+        return results.fetch(count)
 
-        return tags[0]
+    return results
