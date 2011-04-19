@@ -1,0 +1,27 @@
+dontspamme
+
+SUMMARY
+dontspamme is an anti-spam, anonymous remiler tool for Google users.
+
+A user is signing up as a member on a website. The website asks
+for an email account. A lot of people hate giving out their
+email addresses to websites they don't yet trust, so they often create
+extra email accounts to receive the inevitable spam. With dontspamme,
+a user can automatically generate a new email address, a pseudonym,
+and give the pseudonym to the website. All emails sent to that
+pseudonym will be relayed to the user's real email; HOWEVER, emails
+that are sent from a domain that is not the original signup site
+will be flagged as spam because this signup site has doubtlessly
+betrayed you and sold your email. Jerks.
+
+WHO IS THIS FOR?
+dontspamme is for all Google users.
+
+TEAM
+Ben Pence       email@benpence.com
+Alex Levenson
+
+Please email someone on the team to get involved.
+
+LICENSE
+Read 'LICENSE' in the root directory.
