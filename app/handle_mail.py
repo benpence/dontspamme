@@ -1,7 +1,9 @@
-from google.appengine.ext.webapp.mail_handlers import InboundMailHandler 
+import logging
 
 from google.appengine.ext import webapp 
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext.webapp.mail_handlers import InboundMailHandler # Receive
+from google.appengine.api import mail # Send
 
 import model
 import config
@@ -17,6 +19,7 @@ class EmailHandler(InboundMailHandler):
         """
         Main API function. Called when message received.
         """
+
         sender = message.sender
         to = message.to
 
@@ -122,5 +125,11 @@ class EmailHandler(InboundMailHandler):
             return None
 
         return partition[1:]
-        
-application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
+
+def main():
+    logging.getLogger().setLevel(logging.DEBUG)
+    application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
+    webapp.util.run_wsgi_app(application)
+
+if __name__ == '__main__':
+    main()

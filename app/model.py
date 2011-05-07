@@ -1,3 +1,5 @@
+import random
+
 from google.appengine.ext import db
 
 class User(db.Model):
@@ -34,8 +36,8 @@ class Pseudonym(db.Model):
     user        = db.UserProperty()
     mask        = db.StringProperty(multiline=False)
     
-    domain      = db.StringListProperty(multiline=False)
-    contact     = db.ReferenceProperty(Peer, collection_name='contacts')
+    domain      = db.StringListProperty()#multiline=False)
+    #contact     = db.ReferenceProperty(Contact, collection_name='contacts')
     flag        = db.BooleanProperty()
     
     created     = db.DateTimeProperty(auto_now_add=True)
@@ -72,3 +74,15 @@ def where(cls, count=0, **kwargs):
         return results.fetch(count)
 
     return results
+
+random.seed()
+def random_hash(length):
+    """
+    Return random hash with 'length' characters
+    """
+
+    # TODO: Evaluate different random functions in python by efficiency.
+    # Collision resistance is quite unimportant though
+    # TODO: Look into running cron jobs to pre-generate N random hashes
+    
+    return "%x" % random.getrandbits(length * 4)
