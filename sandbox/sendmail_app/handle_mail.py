@@ -7,7 +7,7 @@ from google.appengine.api import mail # Send
 
 class EmailHandler(InboundMailHandler):
     """
-    Calls 'receive' method when an email is sent to STRING@APP_NAME.appspot.com
+    Calls 'receive' method when an email is sent to STRING@APP_NAME.appspotmail.com
 
     Tutorial: http://code.google.com/appengine/docs/python/mail/
     """
