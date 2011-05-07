@@ -16,23 +16,13 @@ class EmailHandler(InboundMailHandler):
         """
         Main API function. Called when message received.
         """
-
+        
         logging.debug(message.original)
-
-        mail.send_mail(
-            sender="ben@bmpence.appspotmail.com",
-            to="bmpence@gmail.com",
-            subject="Test subject",
-            body='\n==\n'.join((
-                message.sender,
-                message.to,
-                #message.cc,
-                #message.bcc,
-                #message.reply_to,
-                message.subject,
-                str(message.body)
-            ))
-        )
+        
+        message.to = "bmpence@gmail.com"
+        # what about verifying who thise came from originally
+        if not hassattr(message,"reply_to"): message.reply_to = message.sender
+        message.send()
 
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
 
