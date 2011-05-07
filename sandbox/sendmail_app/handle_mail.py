@@ -19,9 +19,9 @@ class EmailHandler(InboundMailHandler):
         
         logging.debug(message.original)
         
-        message.to = "bmpence@gmail.com"
+        message.to = "nosnevelxela@gmail.com"
         # what about verifying who thise came from originally
-        if not hassattr(message,"reply_to"): message.reply_to = message.sender
+        if not hasattr(message,"reply_to"): message.reply_to = message.sender
         message.send()
 
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
