@@ -19,8 +19,9 @@ class MainPage(webapp.RequestHandler):
           </html>""")
 
 application = webapp.WSGIApplication(
-                                     [('/', MainPage)],
-                                     debug=True)
+    [('/', MainPage)],
+    debug=True
+)
 
 def main():
     run_wsgi_app(application)

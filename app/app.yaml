@@ -1,5 +1,5 @@
 application: bmpence
-version: 1
+version: 0.1
 runtime: python
 api_version: 1
 
@@ -7,6 +7,9 @@ handlers:
 - url: /_ah/mail/.+ 
   script: handle_mail.py 
   login: admin
+
+- url: /static
+  static_dir: static
 
 - url: /.*
   script: handle_web.py

@@ -34,9 +34,10 @@ class EmailHandler(InboundMailHandler):
             ))
         )
 
+application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
+
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
-    application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
     webapp.util.run_wsgi_app(application)
 
 if __name__ == '__main__':
