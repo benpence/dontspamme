@@ -7,24 +7,23 @@ from google.appengine.api import mail # Send
 
 import model
 import config
+import util
 
 class EmailHandler(InboundMailHandler):
     """
-    Calls 'receive' method when an email is sent to STRING@APP_NAME.appspot.com
+    Calls 'receive' method when an email is sent to STRING@APP_NAME.appspotmail.com
 
     Tutorial: http://code.google.com/appengine/docs/python/mail/
     """
     
     def receive(self, message):
         """
-        Main API function. Called when message received.
+        Called when message an email message is received.
         """
-
-        sender = message.sender
-        to = message.to
-
-        # Email from somebody?
-        pseudo = model.where(model.Pseudonym, 1, email=to)
+        
+        logging.debug("Recieved Mail: \n"+message.original)
+        mask = util.string_between(message.to,end="@")        
+        pseudo = model.get(model.Pseudonym, mask=mask)
 
         if pseudo:
             self.from_stranger(pseudo, sender, message)
@@ -114,17 +113,6 @@ class EmailHandler(InboundMailHandler):
 
         # TODO: Write sanitization
         pass
-
-    def email_split(email, start='', end=''):
-        """
-        Returns rightmost string that is contained by start and end.
-        """
-        partition = email[email.rfind(start): email.rfind(end)]
-
-        if not partition:
-            return None
-
-        return partition[1:]
 
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
