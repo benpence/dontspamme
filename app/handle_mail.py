@@ -15,30 +15,29 @@ class EmailHandler(InboundMailHandler):
 
     Tutorial: http://code.google.com/appengine/docs/python/mail/
     """
-    
     def receive(self, message):
         """
         Called when message an email message is received.
         """
-        
-        logging.debug("Recieved Mail: \n"+message.original)
-        mask = util.string_between(message.to,end="@")        
+        logging.debug("Received Mail: \n" + message.original)
+
+        # To a pseudonym we know?
+        mask = util.string_between(message.to, end="@")
         pseudo = model.get(model.Pseudonym, mask=mask)
 
         if pseudo:
-            self.from_stranger(pseudo, sender, message)
-        
+            self.from_stranger(pseudo, message)
 
-        # Reply from user?
-        tag = self.email_split(to, '+', '@')
-        pseudo = model.where(model.Pseudonym, 1, email=sender)
+        # A reply to a contact?
+        contact_mask = self.string_between(message.to, '+', '@')
+        pseudo = model.get(model.Pseudonym, email=sender)
 
-        if tag and pseudo:
-            self.from_user(pseudo, tag, message)
+        if contact_mask and pseudo:
+            self.from_user(pseudo, contact_mask, message)
 
         # To non-existent user -> do not relay
 
-    def from_stranger(self, pseudo, sender, message):
+    def from_stranger(self, pseudo, message):
         """
         Stranger emailing a pseudonym
         New strangers will be added as Contact.
@@ -46,54 +45,66 @@ class EmailHandler(InboundMailHandler):
 
         Args:
             pseudo: Pseudonym of user
-            sender: stranger email address
             message: dictionary message
         """
 
-        tag = model.where(
-            model.Contact,
-            1,
-            email=sender
-        )
+        contact = model.get(model.Contact, email=message.sender)
 
         # Create entry if new
-        if not tag:
-            tag = model.Contact(
+        if not contact:
+            contact_mask = model.Contact(
                 psuedo=pseudo,
-                # TODO: Write method to generate tags
-                email=sender
+                # TODO: Write method to generate contact masks
+                email=message.sender
             )
+            logging.info("INVALID Stranger: %s -> %s" % (
+                message.sender,
+                message.to,
+            ))
 
-        domain = self.email_split(sender, '@')
+        logging.info("Stranger: %s -> %s" % (
+            message.sender,
+            message.to,
+        ))
+
+        domain = self.string_between(message.sender, '@')
 
         # Send response
         self.prepare_message(message)
         message.to = pseudo.user.email()
-        # TODO: Write function to insert tag into reply-to address
-        message.reply_to = pseudo.mask+config.domain_name
+        # TODO: Write function to insert contact mask into reply-to address
+        message.reply_to = pseudo.mask + '@' + config.domain_name
 
         message.send()
 
-    def from_user(self, pseudo, tag, message):
+    def from_user(self, pseudo, contact_mask, message):
         """
         Send reply to contact.
-        Sanitize message, verify contact tag, send email to contact.
+        Sanitize message, verify contact contact mask, send email to contact.
         
         Args:
             pseudo: Pseudonym of user
-            sender: stranger email address
+            contact_mask: string between + and @
             message: dictionary message
         """
-        contact = model.where(model.Contact, 1, tag=tag)
+        contact = model.get(model.Contact, mask=contact_mask)
         
-        # Invalid tag
+        # Invalid contact mask
         if not contact:
-            # TODO: Should we warn user that they have sent invalid tag?
+            # TODO: Should we warn user that they have sent invalid contact mask?
+            logging.info("INVALID Reply: %s@%s -> ?" % (
+                pseudo.mask, config.domain,
+            ))
             return
+
+        logging.info("Reply: %s@%s -> %s" % (
+            pseudo.mask, config.domain,
+            contact.email,
+        ))
         
         # Send message
         self.sanitize(message, pseudo.user.email())
-        message.sender = pseudo.mask + config.domain_name
+        message.sender = pseudo.mask + '@' + config.domain_name
         message.to = contact.email,
 
         message.send()
@@ -102,7 +113,6 @@ class EmailHandler(InboundMailHandler):
         """
         Add header to message body.
         """
-
         # TODO: Implement preparation of message
         pass
 
@@ -110,7 +120,6 @@ class EmailHandler(InboundMailHandler):
         """
         Remove all traces of User's REAL email address from message body.
         """
-
         # TODO: Write sanitization
         pass
 

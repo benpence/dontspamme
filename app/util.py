@@ -7,7 +7,7 @@ def generate_random_string(length=32, alphabet=string.letters+string.digits):
     """
     return ''.join(random.choice(alphabet) for _ in xrange(length))
 
-def string_between(email, start='', end=''):
+def string_between(email, side='user', start='', end=''):
     """
     Returns rightmost string that is contained by start and end.
     """

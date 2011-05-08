@@ -6,12 +6,12 @@ class User(db.Model):
 
     Attributes:
         user: Google user
-        isAdmin: boolean
+        is_admin: boolean
             True  -> can add and remove users
             False -> cannot add/remove
     """
     user        = db.UserProperty()
-    isAdmin     = db.BooleanProperty()
+    is_admin     = db.BooleanProperty()
 
 class Contact(db.Model):
     pass
@@ -30,7 +30,6 @@ class Pseudonym(db.Model):
             False -> don't
         created: datetime of creation time
     """
-    
     user          = db.UserProperty()
     mask          = db.StringProperty(multiline=False)    
 
@@ -50,7 +49,6 @@ class Contact(db.Model):
         mask: str that maps to the email of the contact
         email: the email of the contact ex: steve@corp.microsoft.com
     """
-
     # TODO: Allow user of Pseudonym to initiate an email conversation.
     # While this is not what the tool was intended for, it should be possible.
 
@@ -60,22 +58,11 @@ class Contact(db.Model):
 
 def get(cls, count=None, **kwargs):
     q = cls.all()
-    for k,v in kwarags:
-        q.filter(k+" =",v)
+
+    for key, value in kwarags.items():
+        q.filter(key + ' =', value)
     
     if count:
         return q.fetch(count)
+
     return q.get()
-
-def where(cls, count=0, **kwargs):
-    results = cls.gql(
-        "WHERE %s" % ' AND '.join(
-            ("%s = :%s" % (key, key) for key in kwargs)
-        ),
-        **kwargs
-    )
-
-    if count:
-        return results.fetch(count)
-
-    return results
