@@ -30,7 +30,29 @@ class EmailAddress(object):
     
     NAME_AND_ADDRESS_PATTERN = "((?:\"(.*)\"\s*)|(?:(.*)\s))<(.*)@(.*)>"
     #NAME_AND_ADDRESS_NO_QUOTES_PATTERN = "<(.*)@(.*)>"
+    pattern = re.compile(
+        # Name
+        r'\"?'
+        r'(?P<name>.(:?\w+\s*)+)?'
+        r'\"?'
+
+        r'\s*'
+
+        # Email address
+        r'\<?(?P<email>(?P<user>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
+        r'\>?$'
+    )
     
-    def __init__(self,raw):
+    def __init__(self, raw):
         self.raw = raw
-        name = raw[raw.find("\"") : ]
+
+        m = self.pattern.search(raw)
+
+        self.name = m.group('name')
+        self.email = m.group('email')
+        self.user = m.group('user')
+        self.contact = m.group('contact')
+        self.domain = m.group('domain')
+
+    def __repr__(self):
+        return self.raw
