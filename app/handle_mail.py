@@ -20,19 +20,18 @@ class EmailHandler(InboundMailHandler):
         logging.debug("Received Mail: \n" + message.original)
 
         # To a pseudonym we know?
-        mask = util.string_between(message.to, end="@")
-        pseudo = model.get(model.Pseudonym, mask=mask)
+        to = util.EmailAddress(message.to)
+        pseudo = model.get(model.Pseudonym, mask=to.user)
 
         if pseudo:
             self.from_stranger(message, pseudo)
             return
 
         # A reply to a contact?
-        contact_mask = self.string_between(message.to, '+', '@')
         pseudo = model.get(model.Contact, email=sender)
 
-        if contact_mask and pseudo:
-            self.from_user(message, pseudo, contact_mask)
+        if to.contact and pseudo:
+            self.from_user(message, pseudo, )
 
         # To non-existent user -> do not relay
 
@@ -50,8 +49,13 @@ class EmailHandler(InboundMailHandler):
 
         # Create entry if new
         if not contact:
-            contact = model.Contact(pseudonym=pseudo, email=message.sender)
+            contact = model.Contact(
+                pseudonym=pseudo,
+                email=message.sender,
+                mask=util.generate_random_string()
+            )
             contact.put()
+
             logging.info("New Contact")
 
         logging.info("Contact: %s -> %s" % (
@@ -59,9 +63,8 @@ class EmailHandler(InboundMailHandler):
             message.to,
         ))
 
-        domain = self.string_between(message.sender, '@')
-
         # TODO: Add in flagging of spam
+        #from_address = EmailAddress(message.sender)
 
         # Send response
         self.prepare_message(message)
@@ -76,7 +79,7 @@ class EmailHandler(InboundMailHandler):
         # TODO: Clear rest of fields to avoid exposing username on cc, bcc?
         message.send()
 
-    def from_user(self, message, pseudo, contact_mask):
+    def from_user(self, message, pseudo, to_address):
         """
         Send reply to contact.
         Sanitize message, verify contact contact mask, send email to contact.
@@ -84,9 +87,9 @@ class EmailHandler(InboundMailHandler):
         Args:
             message: dictionary message
             pseudo: Pseudonym of user
-            contact_mask: string between + and @
+            to_address: recipient
         """
-        contact = model.get(model.Contact, pseudonym=pseudo, mask=contact_mask)
+        contact = model.get(model.Contact, pseudonym=pseudo, mask=to_address.contact)
         
         # Invalid contact mask
         if not contact:

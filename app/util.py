@@ -10,17 +10,6 @@ def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.letters+string
     """
     return ''.join(random.choice(alphabet) for _ in xrange(length))
 
-def string_between(s, start='', end=''):
-    """
-    Returns rightmost string that is contained by start and end.
-    """
-    partition = s[s.find(start): s.rfind(end)]
-
-    if not partition:
-        return None
-    
-    return partition
-
 class EmailAddress(object):
     pattern = re.compile(
         # Name
