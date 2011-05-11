@@ -17,11 +17,10 @@ class EmailHandler(InboundMailHandler):
         Main API function. Called when message received.
         """
         
-        logging.debug(message.original)
-        message.sender = "robots@bmpence.appspotmail.com"
-        message.to = "nosnevelxela@gmail.com"
-        # what about verifying who thise came from originally
+        logging.debug("Recieved:\n" + str(message.original))
+        message.sender = "fakeemailtest@durp.com <robots@bmpence.appspotmail.com>"
         message.reply_to = message.sender
+        message.to = "nosnevelxela@gmail.com"        
         message.send()
 
 application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
