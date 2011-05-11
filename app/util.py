@@ -22,14 +22,6 @@ def string_between(s, start='', end=''):
     return partition
 
 class EmailAddress(object):
-    # groups into:
-    # 1 Name (no quotes)
-    # 2 Part before the @ 
-    # 3 part after the @ 
-    "((?:(?:\"(?:.*)\")\s*)|((?:(?:.*))\s))<(.*)@(.*)>"
-    
-    NAME_AND_ADDRESS_PATTERN = "((?:\"(.*)\"\s*)|(?:(.*)\s))<(.*)@(.*)>"
-    #NAME_AND_ADDRESS_NO_QUOTES_PATTERN = "<(.*)@(.*)>"
     pattern = re.compile(
         # Name
         r'\"?'
