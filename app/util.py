@@ -1,7 +1,9 @@
 import string
 import random
 
-def generate_random_string(length=32, alphabet=string.letters+string.digits):
+DEFAULT_LENGTH = 16
+
+def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.letters+string.digits):
     """
     @return a random string of length @param length from alphabet @alphabet
     """

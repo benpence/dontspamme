@@ -1,5 +1,7 @@
 from google.appengine.ext import db
 
+import util
+
 class User(db.Model):
     """
     A user associated with this app. Primary function is to disallow other users from using app.
@@ -55,6 +57,12 @@ class Contact(db.Model):
     pseudonym   = db.ReferenceProperty(Pseudonym)
     mask        = db.StringProperty(multiline=False)
     email       = db.StringProperty(multiline=False)
+
+    def __init__(self, pseudonym, email):
+        self.pseudonym = pseudonym
+        self.email = email
+
+        self.mask = util.generate_random_string()
 
 def get(cls, count=None, **kwargs):
     q = cls.all()
