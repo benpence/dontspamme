@@ -1,20 +1,27 @@
 import re
 
-pattern = re.compile(
-    # Name
+name_pattern = re.compile(
     r'\"?'
     r'(?P<name>.(:?\w+\s*)+)?'
     r'\"?'
-
     r'\s*'
+)
 
-    # Email address
-    r'\<?(?P<email>(?P<mask>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
+email_pattern = re.compile(
+    r'\<?'
+    r'(?P<email>(?P<user>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
     r'\>?$'
 )
 
-m = pattern.search('"Ben Pence" <ben+ee@dicksdicksdicks.com>')
+original = '"Ben Pence" test+ee@di.com'
+
+separator = original.rfind(' ') + 1
+
+m = name_pattern.search(original[:separator])
 print m.group('name')
-print m.group('mask')
+
+m = email_pattern.search(original[separator:])
+print m.group('email')
+print m.group('user')
 print m.group('contact')
 print m.group('domain')

@@ -11,29 +11,32 @@ def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.letters+string
     return ''.join(random.choice(alphabet) for _ in xrange(length))
 
 class EmailAddress(object):
-    pattern = re.compile(
-        # Name
+    name_pattern = re.compile(
         r'\"?'
-        r'(?P<name>.(:?\w+\s*)+)?'
+        r'(?P<name>.(:?[^ \s"]+\s*)+)?'
         r'\"?'
-
         r'\s*'
+    )
 
-        # Email address
-        r'\<?(?P<email>(?P<user>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
+    email_pattern = re.compile(
+        r'\<?'
+        r'(?P<email>(?P<user>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
         r'\>?$'
     )
     
-    def __init__(self, raw):
-        self.raw = raw
+    def __init__(self, original):
+        self.original = original
 
-        m = self.pattern.search(raw)
+        separator = original.rfind(' ') + 1
 
+        m = self.name_pattern.search(original[:separator])
         self.name = m.group('name')
+
+        m = self.email_pattern.search(original[separator:])
         self.email = m.group('email')
         self.user = m.group('user')
         self.contact = m.group('contact')
         self.domain = m.group('domain')
 
     def __repr__(self):
-        return self.raw
+        return "<EmailAddress '%s'>" % self.original

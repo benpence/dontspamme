@@ -42,7 +42,7 @@ class EmailHandler(InboundMailHandler):
         Strangers sending from invalid domain will be flagged.
 
         Args:
-            message: dictionary message
+            message: InboundEmailMessage
             pseudo: Pseudonym of user
         """
         contact = model.get(model.Contact, pseudonym=pseudo, email=message.sender)
@@ -64,7 +64,7 @@ class EmailHandler(InboundMailHandler):
         ))
 
         # TODO: Add in flagging of spam
-        #from_address = EmailAddress(message.sender)
+        from_address = EmailAddress(message.sender)
 
         # Send response
         self.prepare_message(message)
@@ -85,7 +85,7 @@ class EmailHandler(InboundMailHandler):
         Sanitize message, verify contact contact mask, send email to contact.
         
         Args:
-            message: dictionary message
+            message: InboundEmailMessage
             pseudo: Pseudonym of user
             to_address: recipient
         """
