@@ -1,11 +1,12 @@
-import cgi
+import os
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext.webapp import template
+from google.appengine.api import users
 
-import common
-from model import Pseudonym
+import util
+import model
 
 class MainPage(webapp.RequestHandler):
     def get(self):
@@ -13,21 +14,22 @@ class MainPage(webapp.RequestHandler):
         
         if not user:
             self.redirect(users.create_login_url(self.request.uri))
-        
-        pseudos = Pseudonym.user_pseudonyms(user)
-        
-        self.response.out.write('<html><body>')
-        for pseudo in pseudos:
-            self.response.out.write(cgi.escape(pseudo.user.nickname() + ' ' + pseudo.mask + '@dontspam.me ' + pseudo.domain + ' ' + str(pseudo.created)) + "<br>")
-        
-        # Write the submission form and the footer of the page
-        self.response.out.write("""
-              <form action="/generate" method="post">
-                <div><textarea name="domain" rows="1" cols="20"></textarea></div>
-                <div><input type="submit" value="Generate Pseudonym"></div>
-              </form>
-            </body>
-          </html>""")
+'
+        # User's pseudonyms newest->oldest
+        q = model.Pseudonym.all().filter('user =', user).order('-created')
+        pseudos = q.all()
+
+        template_values = {
+            'pseudos': pseudos,
+        }
+
+        path = os.path.join(
+            os.path.dirname(__file__),
+            'templates',
+            'index.html'
+        )
+
+        self.response.out.write(template.render(path, template_values))
 
 class Generate(webapp.RequestHandler):
     def post(self):
@@ -36,13 +38,12 @@ class Generate(webapp.RequestHandler):
         if not user:
             self.redirect(users.create_login_url('/'))
         
-        pseudo = Pseudonym()
-        pseudo.user = user
-        pseudo.mask = common.random_hash()
-        pseudo.domain = self.request.get('domain')
-
+        pseudo = Pseudonym(
+            user=user,
+            mask=util.generate_random_string()
+        )
         pseudo.put()
-        
+
         self.redirect('/')
 
 application = webapp.WSGIApplication(

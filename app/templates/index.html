@@ -1,0 +1,8 @@
+<html>
+    <body>
+        <b>User: {{ pseudo.user.nickname() }}</b><br />
+        {% for pseudo in pseudos %}
+            {{ pseudo.mask }}<br />
+        {% endfor %}
+  </body>
+</html>
