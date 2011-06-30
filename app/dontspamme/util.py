@@ -25,6 +25,17 @@ class EmailAddress(object):
     )
     
     def __init__(self, original):
+        """
+            Args:
+                original: InboundEmailMessage
+
+            Regex fields:
+                name: The string in quotes at the beginning
+                email: Full email (without the quotes part)
+                    user: Before the last '+'
+                    contact: After the last '+' but before the '@'
+                    domain: After the '@'
+        """
         self.original = original
 
         separator = original.rfind(' ') + 1

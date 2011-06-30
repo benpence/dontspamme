@@ -1,18 +1,18 @@
 application: bmpence
-version: 0.1
+version: 1
 runtime: python
 api_version: 1
 
 handlers:
 - url: /_ah/mail/.+ 
-  script: handle_mail.py 
+  script: dontspamme/mail/handler.py
   login: admin
 
 - url: /static
-  static_dir: static
+  static_dir: dontspamme/web/static
 
 - url: /.*
-  script: handle_web.py
+  script: dontspamme/web/handler.py
   login: admin
 
 inbound_services:

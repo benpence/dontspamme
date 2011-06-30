@@ -1,5 +1,7 @@
 from google.appengine.ext import db
 
+import dontspamme.config
+
 class User(db.Model):
     """
     A user associated with this app. Primary function is to disallow other users from using app.
@@ -14,6 +16,9 @@ class User(db.Model):
     is_admin     = db.BooleanProperty()
 
 class Contact(db.Model):
+    """
+    Prototype
+    """
     pass
 
 class Pseudonym(db.Model):
@@ -38,6 +43,12 @@ class Pseudonym(db.Model):
     should_filter = db.BooleanProperty()
     
     created       = db.DateTimeProperty(auto_now_add=True)
+
+    def email(self):
+        """
+        Returns pseudonym's full local email address
+        """
+        return '%s@%s' % (self.mask, dontspamme.config.domain_name)
             
 class Contact(db.Model):
     """
@@ -55,6 +66,8 @@ class Contact(db.Model):
     pseudonym   = db.ReferenceProperty(Pseudonym)
     mask        = db.StringProperty(multiline=False)
     email       = db.StringProperty(multiline=False)
+    
+    created     = db.DateTimeProperty(auto_now_add=True)
 
 def get(cls, count=None, **kwargs):
     q = cls.all()

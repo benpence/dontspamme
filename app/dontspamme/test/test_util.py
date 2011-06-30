@@ -1,6 +1,6 @@
 import unittest
 
-import util
+import dontspamme.util
 
 class TestSequenceFunctions(unittest.TestCase):
     NUMBER_OF_TESTS = 100000
@@ -12,7 +12,7 @@ class TestSequenceFunctions(unittest.TestCase):
         uniques = set()
 
         for i in xrange(self.NUMBER_OF_TESTS):
-            uniques.add(util.generate_random_string())
+            uniques.add(dontspamme.util.generate_random_string())
 
         self.assertEqual(len(uniques), self.NUMBER_OF_TESTS)
 
@@ -30,8 +30,7 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
         for test_set in expected_results[1:]:
-            address = util.EmailAddress(test_set[0])
-            print address
+            address = dontspamme.util.EmailAddress(test_set[0])
 
             for i, property in enumerate(expected_results[0]):
                 self.assertEqual(
