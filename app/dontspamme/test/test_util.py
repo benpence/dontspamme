@@ -22,10 +22,10 @@ class TestSequenceFunctions(unittest.TestCase):
             ('original', 'name', 'email', 'user', 'contact', 'domain'),
 
             # Expected Values
-            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', None, 'pence.com'),
-            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', None, 'pence.com'),
-            ('ben@pence.com', None, 'ben@pence.com', 'ben', None, 'pence.com'),
-            ('"Ben Pence <ben@doo.doc>" <ben@pence.com>', 'Ben Pence <ben@doo.doc>', 'ben@pence.com', 'ben', None, 'pence.com'),
+            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', '', 'pence.com'),
+            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', '', 'pence.com'),
+            ('ben@pence.com', '', 'ben@pence.com', 'ben', '', 'pence.com'),
+            ('"Ben Pence <ben@doo.doc>" <ben@pence.com>', 'Ben Pence <ben@doo.doc>', 'ben@pence.com', 'ben', '', 'pence.com'),
             ('"Ben Pence <ben+aa@doo.doc>" <ben+bb@pence.com>', 'Ben Pence <ben+aa@doo.doc>', 'ben+bb@pence.com', 'ben', 'bb', 'pence.com'),
         )
 

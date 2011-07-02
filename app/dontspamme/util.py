@@ -26,28 +26,28 @@ class EmailAddress(object):
     
     def __init__(self, original):
         """
-            Args:
-                original: InboundEmailMessage
+        Args:
+            original: InboundEmailMessage
 
-            Regex fields:
-                name: The string in quotes at the beginning
-                email: Full email (without the quotes part)
-                    user: Before the last '+'
-                    contact: After the last '+' but before the '@'
-                    domain: After the '@'
+        Regex fields:
+            name: The string in quotes at the beginning
+            email: Full email (without the quotes part)
+                user: Before the last '+'
+                contact: After the last '+' but before the '@'
+                domain: After the '@'
         """
         self.original = original
 
         separator = original.rfind(' ') + 1
 
         m = self.name_pattern.search(original[:separator])
-        self.name = m.group('name')
+        self.name = m.group('name') or ''
 
         m = self.email_pattern.search(original[separator:])
-        self.email = m.group('email')
-        self.user = m.group('user')
-        self.contact = m.group('contact')
-        self.domain = m.group('domain')
+        self.email = m.group('email') or ''
+        self.user = m.group('user') or ''
+        self.contact = m.group('contact') or ''
+        self.domain = m.group('domain') or ''
 
     def __repr__(self):
         return "<EmailAddress '%s'>" % self.original
