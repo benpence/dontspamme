@@ -25,18 +25,19 @@ class EmailHandler(InboundMailHandler):
         logging.debug("Received Mail: \n" + message.original)
 
         # To a pseudonym we know?
-        to = util.EmailAddress(message.to)
-        pseudo = model.get(model.Pseudonym, mask=to.user)
+        to_address = util.EmailAddress(message.to)
+        pseudo = model.get(model.Pseudonym, mask=to_address.user)
 
         if pseudo:
-            from_stranger(message, pseudo, to.email)
+            from_stranger(message, pseudo, to_address.email)
             return
 
         # A reply to a contact from a user's REAL email?
-        pseudo = model.get(model.Contact, email=sender)
+        # TODO: BROKEN: Find an efficient way to match real email to datastore
+        pseudo = model.get(model.Pseudonym, email=)
 
-        if to.contact and pseudo:
-            from_user(message, pseudo, )
+        if to_address.contact and pseudo:
+            from_user(message, pseudo, to_address)
 
         # To non-existent user -> do not relay
 

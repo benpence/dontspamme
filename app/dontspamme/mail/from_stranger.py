@@ -26,7 +26,8 @@ def from_stranger(self, message, pseudo, stranger_address):
         contact = model.Contact(
             pseudonym=pseudo,
             email=stranger_address.email,
-            mask=util.generate_random_string()
+            mask=util.generate_random_string(),
+            name=stranger_address.name
         )
         contact.put()
 
@@ -34,9 +35,8 @@ def from_stranger(self, message, pseudo, stranger_address):
 
     logging.info("Contact: %s -> %s" % (
         stranger_address.email,
-        pseudo.email(),
+        pseudo.email()
     ))
-
 
     # Send response
     prepare_message(
@@ -45,14 +45,20 @@ def from_stranger(self, message, pseudo, stranger_address):
         isSpam=stranger_address.domain not in pseudo.domains
     )
 
+    message.cc = message.bcc = ''
     message.to = pseudo.user.email()
-    message.sender = "<%s+%s@%s>" % (
+
+    # This is important because it lets the user know WHO EMAILED THEM
+    message.sender = "'%s <%s>' <%s+%s@%s>" % (
+        # ie "'Bob Frizzel <bob@frizzel.net>' <x2c38+c8238@myapp.appspotmail.com>"
+        contact.name,
+        contact.email,
+
         pseudo.mask,
         contact.mask,
         dontspamme.config.domain_name
     )
 
-    # TODO: Clear rest of fields to avoid exposing username on cc, bcc?
     message.send()
 
 def prepare_message(self, message, pseudo, isSpam=False):
@@ -67,4 +73,4 @@ def prepare_message(self, message, pseudo, isSpam=False):
     # TODO: Add link generation for adding this domain to pseudo.domains
     
     if isSpam and pseudo.should_filter:
-        message.subject = dontpsamme.config.spam_label + ' ' + message.subject
+        message.subject = dontspamme.config.spam_label + ' ' + message.subject

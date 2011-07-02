@@ -59,6 +59,7 @@ class Contact(db.Model):
         pseudonym: Pseudonym object. Represents who this is a contact for.
         mask: str that maps to the email of the contact
         email: the email of the contact ex: steve@corp.microsoft.com
+        name: the name string, if applicable, from the contact's first correspondence
     """
     # TODO: Allow user of Pseudonym to initiate an email conversation.
     # While this is not what the tool was intended for, it should be possible.
@@ -66,13 +67,14 @@ class Contact(db.Model):
     pseudonym   = db.ReferenceProperty(Pseudonym)
     mask        = db.StringProperty(multiline=False)
     email       = db.StringProperty(multiline=False)
+    name        = db.StringProperty(multiline=False)
     
     created     = db.DateTimeProperty(auto_now_add=True)
 
 def get(cls, count=None, **kwargs):
     q = cls.all()
 
-    for key, value in kwarags.items():
+    for key, value in kwargs.items():
         q.filter(key + ' =', value)
     
     if count:

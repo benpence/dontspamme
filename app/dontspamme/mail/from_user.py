@@ -26,13 +26,14 @@ def from_user(self, message, pseudo, to_address):
     logging.info("Reply: %s -> %s" % (pseudo.email(), contact.email))
     
     # Send message
-    self.sanitize(message, pseudo)
+    self.sanitize(message, pseudo, to_address, contact)
+
     message.sender = pseudo.email()
     message.to = contact.email
 
     message.send()
 
-def sanitize_message(self, message, pseudo):
+def sanitize_message(self, message, pseudo, to_address, contact):
     """
     Remove all traces of User's REAL email address from message body.
 
@@ -40,10 +41,10 @@ def sanitize_message(self, message, pseudo):
         message: InboundEmailMessage
         pseudo: Pseudonym
     """
-    # TODO: Write sanitization
+    # TODO: Refine sanitization to be more flexible (regexes?)
 
-    """
-    Something like this:
+    # Remove traces of real email address (ie quoted reply)
     message.body.replace(pseudo.user.email(), pseudo.email)
-    """
-    pass
+
+    # If message is quoted in reply, don't reveal reply-address
+    message.body.replace(to_address.original, contact.email)
