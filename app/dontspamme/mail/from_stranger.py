@@ -35,7 +35,7 @@ def from_stranger(self, message, pseudo, stranger_address):
 
     logging.info("Contact: %s -> %s" % (
         stranger_address.email,
-        pseudo.email()
+        pseudo.email
     ))
 
     # Send response

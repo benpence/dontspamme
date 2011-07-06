@@ -21,15 +21,15 @@ def from_user(self, message, pseudo, to_address):
     # Invalid contact mask
     if not contact:
         # TODO: Should we warn user that they have sent invalid contact mask?
-        logging.info("Invalid Reply: %s -> ?" % pseudo.email())
+        logging.info("Invalid Reply: %s -> ?" % pseudo.email)
         return
 
-    logging.info("Reply: %s -> %s" % (pseudo.email(), contact.email))
+    logging.info("Reply: %s -> %s" % (pseudo.email, contact.email))
     
     # Send message
     self.sanitize(message, pseudo, to_address, contact)
 
-    message.sender = pseudo.email()
+    message.sender = pseudo.email
     message.to = contact.email
 
     message.send()

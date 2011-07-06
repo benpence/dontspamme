@@ -45,6 +45,7 @@ class Pseudonym(db.Model):
     
     created       = db.DateTimeProperty(auto_now_add=True)
 
+    @property
     def email(self):
         """
         Returns pseudonym's full local email address
