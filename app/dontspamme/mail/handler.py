@@ -33,8 +33,11 @@ class EmailHandler(InboundMailHandler):
             return
 
         # A reply to a contact from a user's REAL email?
-        # TODO: BROKEN: Find an efficient way to match real email to datastore
-        pseudo = model.get(model.Pseudonym, email=)
+        # TODO: Find an efficient way to match real email to datastore (add Pseudonym field?)
+        pseudo = util.first(
+            model.Pseudonym.all(),
+            lambda p: p.email in message.sender
+        )
 
         if to_address.contact and pseudo:
             from_user(message, pseudo, to_address)

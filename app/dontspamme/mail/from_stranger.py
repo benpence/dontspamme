@@ -46,7 +46,7 @@ def from_stranger(self, message, pseudo, stranger_address):
     )
 
     message.cc = message.bcc = ''
-    message.to = pseudo.user.email()
+    message.to = pseudo.email
 
     # This is important because it lets the user know WHO EMAILED THEM
     message.sender = "'%s <%s>' <%s+%s@%s>" % (
@@ -72,5 +72,5 @@ def prepare_message(self, message, pseudo, isSpam=False):
     """
     # TODO: Add link generation for adding this domain to pseudo.domains
     
-    if isSpam and pseudo.should_filter:
+    if isSpam and not pseudo.should_drop:
         message.subject = dontspamme.config.spam_label + ' ' + message.subject

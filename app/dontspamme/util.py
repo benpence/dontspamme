@@ -10,6 +10,13 @@ def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.letters+string
     """
     return ''.join(random.choice(alphabet) for _ in xrange(length))
 
+def first(items, test=lambda x: True):
+    for item in items:
+        if test(item):
+            return item
+
+    return None
+
 class EmailAddress(object):
     name_pattern = re.compile(
         r'\"?'

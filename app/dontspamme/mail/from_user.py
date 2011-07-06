@@ -15,7 +15,8 @@ def from_user(self, message, pseudo, to_address):
     contact = model.get(
         model.Contact,
         pseudonym=pseudo,
-        mask=to_address.contact)
+        mask=to_address.contact
+    )
     
     # Invalid contact mask
     if not contact:
@@ -40,11 +41,13 @@ def sanitize_message(self, message, pseudo, to_address, contact):
     Args:
         message: InboundEmailMessage
         pseudo: Pseudonym
+        to_address: EmailAddress
+        contact: reply to Contact 
     """
     # TODO: Refine sanitization to be more flexible (regexes?)
 
     # Remove traces of real email address (ie quoted reply)
-    message.body.replace(pseudo.user.email(), pseudo.email)
+    message.body.replace(pseudo.email, pseudo.email)
 
     # If message is quoted in reply, don't reveal reply-address
     message.body.replace(to_address.original, contact.email)

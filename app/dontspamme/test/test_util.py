@@ -16,6 +16,28 @@ class TestSequenceFunctions(unittest.TestCase):
 
         self.assertEqual(len(uniques), self.NUMBER_OF_TESTS)
 
+    def test_first(self):
+        first = dontspamme.util.first
+
+        expected_results = (
+            (
+                (('x', 'y', 'z'), lambda x: x == 'z'),
+                'z'
+            ),(
+                ({'a': 1, 'b': 2}, lambda x: x == 'a'),
+                'a'
+            ),(
+                ((1, 2, 3), lambda x: x == 4),
+                None
+            )
+        )
+
+        for test_set in expected_results:
+            self.assertEqual(
+                first(*test_set[0]),
+                test_set[1]
+            )
+
     def test_EmailAddress(self):
         expected_results = (
             # Columns

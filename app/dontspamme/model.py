@@ -4,7 +4,8 @@ import dontspamme.config
 
 class User(db.Model):
     """
-    A user associated with this app. Primary function is to disallow other users from using app.
+    A user associated with this app. Primary function is to disallow other
+    users from using app.
 
     Attributes:
         user: Google user
@@ -30,9 +31,9 @@ class Pseudonym(db.Model):
         mask: Pseudonym string. example: a38g70a
         domain/domains: Legitimate domain(s).
         contact/contacts: Collection of contacts associated with this pseudonym
-        should_filter: boolean
-            True  -> flag emails from invalid contacts
-            False -> don't
+        should_drop: boolean
+            True  -> drop emails from invalid contacts
+            False -> flag emails from invalid contacts
         created: datetime of creation time
     """
     user          = db.UserProperty()
@@ -40,7 +41,7 @@ class Pseudonym(db.Model):
 
     domains       = db.StringListProperty()
     contact       = db.ReferenceProperty(Contact, collection_name='contacts')
-    should_filter = db.BooleanProperty()
+    should_drop   = db.BooleanProperty()
     
     created       = db.DateTimeProperty(auto_now_add=True)
 
