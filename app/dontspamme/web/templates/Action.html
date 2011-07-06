@@ -1,0 +1,14 @@
+<html>
+    <body>
+        <script language='text/javascript'>
+            // TODO: Make this dialog autosubmit the form
+            confirm('Are you sure you want to {{ confirmation }}?');
+        </script>
+        
+        <form id='variables' action='/{{ action }}'>
+            {% for key in post_variables %}
+                <hidden name='{{ key }}' value='{{ post_variables[key] }}'>{{ }}
+            {% endfor %}
+        </form>
+  </body>
+</html>

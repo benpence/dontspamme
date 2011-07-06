@@ -13,7 +13,7 @@ handlers:
 
 - url: /.*
   script: dontspamme/web/handler.py
-  login: admin
+  login: required
 
 inbound_services:
 - mail
