@@ -1,1 +1,0 @@
-SPAM_LABEL = '(SPAM)'
