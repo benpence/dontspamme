@@ -1,8 +1,46 @@
 <html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
+        <script type="text/javascript" src="/static/js/dontspamme.js"></script>
+    </head>
+    
     <body>
-        <b>User: {{ pseudo.user.nickname() }}</b><br />
         {% for pseudo in pseudos %}
-            {{ pseudo.mask }}<br />
+            <div class='pseudonym_row'>
+                <div>
+                    <div class="pseudonym_title">
+                        {{ pseudo.mask }}@{{ domain_name }}
+                    </div>
+                    <div class="pseudonym_domain">
+                        <form action='/removedomain' method='post'>
+                            (<input type='hidden' name='domain' />
+                            <input type='hidden' name='mask' value="{{ pseudo.mask }}" />
+                            {% for domain in pseudo.domains %}
+                                <a href='#' onClick='dontspamme.removeDomain(this.parentNode, "{{ domain }}")'>{{ domain }}</a>
+                            {% endfor %})
+                        </form>
+                    </div>
+                </div>
+                <form action='/drop' method='post'>
+                    <input type='hidden' name='mask' value='{{ pseudo.mask }}'/>
+                    <a href='#' onClick='this.parentNode.submit()'>
+                        {% if pseudo.should_drop %}
+                            Flag Spam
+                        {% else %}   
+                            Drop Spam
+                        {% endif %} 
+                    </a>
+                </form>
+                <form action='/delete' method='post'>
+                    <input type='hidden' name='mask' value='{{ pseudo.mask }}'/>
+                    <a href='#' onClick='this.parentNode.submit()'>Delete</a>
+                </form>
+            </div>
         {% endfor %}
-  </body>
+        
+        <form action='/generate' method='post'>
+            <input id='generate' type="text" name='domain' />
+            <a href='#' onClick='dontspamme.checkDomain(this.parentNode)'>Generate New Pseudonym</a>
+        </form>
+    </body>
 </html>

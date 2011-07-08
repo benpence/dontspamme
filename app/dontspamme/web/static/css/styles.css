@@ -1,0 +1,38 @@
+body {
+    font-family: sans-serif;
+}
+
+form {
+    margin: 0px;
+}
+
+.pseudonym_row {
+    margin: 8px 0px 8px 2px;
+    padding: 4px;
+    border: 1px solid #eee;
+}
+
+.pseudonym_title {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.pseudonym_domain {
+    text-transform: uppercase;
+    font-size: 11px;
+    color: #999;
+}
+
+.pseudonym_domain a:hover {
+    text-decoration: line-through;
+}
+
+.pseudonym_domain a:visited {
+    color: #999;
+}
+
+.pseudonym_row a {
+    text-transform: uppercase;
+    font-size: 11px;
+}

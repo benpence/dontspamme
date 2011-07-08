@@ -1,9 +1,8 @@
-import os
-
+import dontspamme.config
 import dontspamme.model as model
 from dontspamme.web.authenticate import AuthenticatedRequest
 
-class MainPage(Page):
+class MainPage(AuthenticatedRequest):
     """
     The root page that
         Displays the user's Pseudonyms
@@ -11,25 +10,25 @@ class MainPage(Page):
         Allows the user to generate new Pseudonyms
     """
     def get(self):
-        user = self.app_user()
+        user = self.get_valid_user()
+        if not user:
+            return
 
         # User's pseudonyms newest->oldest
-        q = model.Pseudonym.all().filter('user =', user).order('-created')
-        pseudos = q.all()
-
-        template_values = {
-            'pseudos': pseudos,
-        }
+        pseudos = model.Pseudonym.all().filter('user =', user).order('-created')
 
         # TODO: Modify the template for the 11.7 functionality
         # TODO: Introduce key obfuscation in URL to deter cross site forgery
         #   Maybe get requests will ask for confirmation and post will not?
         self.render_template(
             'MainPage',
-            template_values
+            {
+                'pseudos': pseudos,
+                'domain_name': dontspamme.config.domain_name,
+            }
         )
         
-class AdminPage(Page):
+class AdminPage(AuthenticatedRequest):
     # TODO: Write admin page
     pass    
     

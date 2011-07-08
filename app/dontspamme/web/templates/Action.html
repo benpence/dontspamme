@@ -1,14 +1,21 @@
 <html>
-    <body>
-        <script language='text/javascript'>
-            // TODO: Make this dialog autosubmit the form
-            confirm('Are you sure you want to {{ confirmation }}?');
+    <head>
+        <script type="text/javascript">
+            function askForConfirmation(){
+                if(confirm("Are you sure you want to {{ confirmation }}?")){
+                    document.confirmation.submit();
+                } else {
+                    window.location = '/';
+                }
+            }
         </script>
-        
-        <form id='variables' action='/{{ action }}'>
-            {% for key in post_variables %}
-                <hidden name='{{ key }}' value='{{ post_variables[key] }}'>{{ }}
-            {% endfor %}
+    </head>
+    
+    <body onLoad='askForConfirmation()'>
+        <form name='confirmation' action='/{{ action }}' method='post'>
+        {% for pair in post_variables.items %}
+            <input type='hidden' name='{{ pair.0 }}' value='{{ pair.1 }}' />
+        {% endfor %}
         </form>
-  </body>
+    </body>
 </html>

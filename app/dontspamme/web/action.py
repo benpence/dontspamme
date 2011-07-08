@@ -1,140 +1,204 @@
 import cgi
+import logging
 
 import dontspamme.util as util
 import dontspamme.model as model
 from dontspamme.web.authenticate import AuthenticatedRequest
 
+class confirm_get(object):
+    """
+    Request decorator
+        Verifies that the user is a member of this app
+        Validates 'get' parameter 'p'
+        Runs the get method (retrieve data for confirmation template)
+        Renders the confirmation template
+    """
+    def __init__(self, action, format_string):
+        self.action = action
+        self.format_string = format_string
+
+    def __call__(self, get_method):
+        def wrapper(handler):
+            """
+            URL in the format domain/action?p=X
+            """
+            user = handler.get_valid_user()
+            if not user:
+                return handler.home()
+            
+            variables = handler.get_post_dict()
+            """
+            Run get method
+            Allow get method to 'break out' of response by returning False
+            Environment (self) will include
+                variables: value of get parameter 'p'
+                user: google user signed in
+            """
+            if get_method(handler, user, variables) == False:
+                return handler.home()
+    
+            handler.render_template(
+                'Action',
+                {
+                    'confirmation': self.format_string % variables,
+                    'action': self.action,
+                    'post_variables': variables,
+                }
+            )
+        return wrapper  
+
+def confirmed_post(post_method):
+    """
+    Request decorator
+        Verifies that the user is a member of this app
+        Validates 'get' parameter 'p'
+        Runs the post method (modifies the datastore)
+        Redirects to /
+    """
+    def wrapper(handler):
+        # TODO: Add logging to confirmed_post
+        user = handler.get_valid_user()
+        if not user:
+            return handler.home()
+        
+        variables = handler.get_post_dict()
+        """
+        Run post method
+        Environment (self) will include
+            variables: value of get parameter 'p'
+            user: google user signed in
+        """
+        post_method(handler, user, variables)
+            
+        # TODO: Add in post data to acknowledge delete
+        return handler.home()
+        
+    return wrapper
+
+class AddDomainAction(AuthenticatedRequest):
+    """
+    Delete a domain from a Pseudonym
+    """
+    @confirm_get('adddomain', "add the domain '%(domain)s' to the Pseudonym '%(mask)s'")
+    def get(self, user, variables):
+        pass
+
+    @confirmed_post
+    def post(self, user, variables):
+        if 'mask' not in variables or 'domain' not in variables:
+            return self.home()
+
+        # Pseudonym in db?    
+        pseudo = model.get(
+            model.Pseudonym,
+            mask=variables['mask'].upper(),
+            user=user
+        )
+        if not pseudo:
+            return self.home()
+        if variables['domain'] not in pseudo.domains:
+            pseudo.domains.append(variables['domain'])
+            pseudo.put()
+
+class RemoveDomainAction(AuthenticatedRequest):
+    """
+    Delete a domain from a Pseudonym
+    """
+    @confirm_get('removedomain', "remove the domain '%(domain)s' from the Pseudonym '%(mask)s'")
+    def get(self, user, variables):
+        pass
+        
+    @confirmed_post
+    def post(self, user, variables):
+        logging.info(variables)
+        if 'mask' not in variables or 'domain' not in variables:
+            return self.home()
+        
+        # Pseudonym in db?    
+        pseudo = model.get(
+            model.Pseudonym,
+            mask=variables['mask'].upper(),
+            user=user
+        )
+        if not pseudo:
+            return self.home()
+        if variables['domain'] in pseudo.domains and len(pseudo.domains) > 1:
+            pseudo.domains.remove(variables['domain'])
+            pseudo.put()
+        
 class GenerateAction(AuthenticatedRequest):
     """
     Create a new Pseudonym action
     """
-    def get(self):
-        user = self.app_user()
-        
-        # Properly formatted request?
-        domain_str = cgi.escape(self.request.post('domain'))
-        if not domain_str:
-            self.redirect('/')
-        
-        self.render_template(
-            'Action',
-            {
-                'confirmation': "create a new Pseudonym with domain '%s'" % domain_str,
-                'action': 'generate',
-                'post_variables': self.request.getall(),
-            }
-        )
+    @confirm_get('generate', "create a new Pseudonym with domain '%(domain)s'")
+    def get(self, user, variables):
+        pass
     
-    def post(self):
-        # TODO: Add logging for generate
-        user = self.app_user()
-        
-        # TODO: ? Does self.request.get work in post?
-        domain_str = cgi.escape(self.request.post('domain'))
-        
+    @confirmed_post
+    def post(self, user, variables):
+        if 'domain' not in variables:
+            return self.home()
+            
         # Perform action
-        pseudo = Pseudonym(
+        pseudo = model.Pseudonym(
             user=user,
-            mask=util.generate_random_string(),
-            domains=[domain_str],
+            mask=util.generate_random_string().upper(),
+            domains=[variables['domain'].upper()],
             should_drop=False
         )
         pseudo.put()
-
-        # TODO: Add in post data to acknowledge generate
-        self.redirect('/')
 
 class DeleteAction(AuthenticatedRequest):
     """
     Delete a Pseudonym action
     """
-    def get(self):
-        user = self.app_user()
+    @confirm_get('delete', "delete the Pseudonym '%(mask)s'")
+    def get(self, user, variables):
+        pass
         
-        # Properly formed request?
-        pseudo_str = cgi.escape(self.request.get('pseudonym'))
-        if not pseudo_str:
-            self.redirect('/')
-        
-        self.render_template(
-            'Action',
-            {
-                'confirmation': "delete the Pseudonym '%s'" % pseudo_str,
-                'action': 'delete',
-                'post_variables': self.request.getall()
-            }
-        )
-        
-    def post(self):
-        # TODO: Add logging for delete
-        user = self.app_user()
-        
-        # Properly formed request?
-        pseudo_str = cgi.escape(self.request.post('pseudonym'))
-        if not pseudo_str:
-            self.redirect('/')
+    @confirmed_post
+    def post(self, user, variables):
+        logging.info(variables)
+        if 'mask' not in variables:
+            return self.home()
         
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=pseudo_str,
+            mask=variables['mask'].upper(),
             user=user
         )
         if not pseudo:
-            self.redirect('/')
+            return self.home()
         
         # Perform action
-        # TODO: Implement the deletion
-        # for contact in pseudo.contacts:
-        #   contact.drop()
-        # pseudo.drop()
+        if pseudo.contact:
+            for contact in pseudo.contacts:
+                contact.delete()
+        pseudo.delete()
         
-        # TODO: Add in post data to acknowledge delete
-        self.redirect('/')
-
 class DropAction(AuthenticatedRequest):
     """
     Toggle a Pseudonym's should_drop attribute
     """
-    def get(self):
-        user = self.app_user()
-        
-        # Properly formed request?
-        pseudo_str = cgi.escape(self.request.get('pseudonym'))
-        if not pseudo_str:
-            self.redirect('/')
-            
-        confirm_str = ['start', 'stop'][pseudo.should_drop] + " discarding spam emails to the Pseudonym '%s'" % pseudo.mask
-        
-        self.render_template(
-            'Action',
-            {
-                'confirmation': confirm_str,
-                'action': 'drop',
-                'post_variables': self.request.getall()
-            }
-        )
-        
-    def post(self):
-        # TODO: Add logging for drop
-        user = self.app_user()
-        
-        # Properly formed request?
-        pseudo_str = cgi.escape(self.request.post('pseudonym'))
-        if not pseudo_str:
-            self.redirect('/')
+    @confirm_get('drop', "change spam email discarding for the Pseudonym '%(mask)s'")
+    def get(self, user, variables):
+        pass
+          
+    @confirmed_post
+    def post(self, user, variables):        
+        if 'mask' not in variables:
+            return self.home()
         
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=pseudo_str,
+            mask=variables['mask'].upper(),
             user=user
         )
         if not pseudo:
-            self.redirect('/')
+            return self.home()
         
         # Perform action
         pseudo.should_drop = not pseudo.should_drop
-        
-        # TODO: Add in post data to acknowledge drop
-        self.redirect('/')
+        pseudo.put()
