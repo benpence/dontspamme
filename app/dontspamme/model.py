@@ -9,12 +9,8 @@ class User(db.Model):
 
     Attributes:
         user: Google user
-        is_admin: boolean
-            True  -> can add and remove users
-            False -> cannot add/remove
     """
     user        = db.UserProperty()
-    is_admin     = db.BooleanProperty()
 
 class Contact(db.Model):
     """

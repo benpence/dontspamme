@@ -9,8 +9,8 @@ class confirm_get(object):
     """
     Request decorator
         Verifies that the user is a member of this app
-        Validates 'get' parameter 'p'
-        Runs the get method (retrieve data for confirmation template)
+        Creates dict of get variables
+        Runs the get method (retrieve data for confirmation template if necessary)
         Renders the confirmation template
     """
     def __init__(self, action, format_string):
@@ -30,13 +30,14 @@ class confirm_get(object):
             """
             Run get method
             Allow get method to 'break out' of response by returning False
-            Environment (self) will include
-                variables: value of get parameter 'p'
-                user: google user signed in
+            Params:
+                user: current Google user
+                variables: dict of get variables
             """
             if get_method(handler, user, variables) == False:
                 return handler.home()
     
+            # Render confirmation template
             handler.render_template(
                 'Action',
                 {
@@ -64,9 +65,9 @@ def confirmed_post(post_method):
         variables = handler.get_post_dict()
         """
         Run post method
-        Environment (self) will include
-            variables: value of get parameter 'p'
-            user: google user signed in
+        Params:
+            user: current Google user
+            variables: dict of get variables
         """
         post_method(handler, user, variables)
             
