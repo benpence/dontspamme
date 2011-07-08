@@ -30,6 +30,10 @@ def from_stranger(self, message, pseudo, stranger_address):
             name=stranger_address.name
         )
         contact.put()
+        
+        # Update pseudonym
+        psuedo.contacts.append(contact)
+        pseudo.put()
 
         logging.info("New Contact")
 
