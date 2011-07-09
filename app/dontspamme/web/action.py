@@ -100,6 +100,12 @@ class AddDomainAction(AuthenticatedRequest):
         if variables['domain'] not in pseudo.domains:
             pseudo.domains.append(variables['domain'])
             pseudo.put()
+            
+            logging.info("%s added '%s' to mask '%s'" % (
+                user.email(),
+                variables['domain'],
+                pseudo.mask
+            ))
 
 class RemoveDomainAction(AuthenticatedRequest):
     """
@@ -111,7 +117,6 @@ class RemoveDomainAction(AuthenticatedRequest):
         
     @confirmed_post
     def post(self, user, variables):
-        logging.info(variables)
         if 'mask' not in variables or 'domain' not in variables:
             return self.home()
         
@@ -126,6 +131,12 @@ class RemoveDomainAction(AuthenticatedRequest):
         if variables['domain'] in pseudo.domains and len(pseudo.domains) > 1:
             pseudo.domains.remove(variables['domain'])
             pseudo.put()
+            
+            logging.info("%s removed '%s' from mask '%s'" % (
+                user.email(),
+                variables['domain'],
+                pseudo.mask
+            ))
         
 class GenerateAction(AuthenticatedRequest):
     """
@@ -148,6 +159,12 @@ class GenerateAction(AuthenticatedRequest):
             should_drop=False
         )
         pseudo.put()
+        
+        logging.info("%s generated mask '%s' with domain '%s'" % (
+            user.email(),
+            pseudo.mask,
+            variables['domain']
+        ))
 
 class DeleteAction(AuthenticatedRequest):
     """
@@ -159,7 +176,6 @@ class DeleteAction(AuthenticatedRequest):
         
     @confirmed_post
     def post(self, user, variables):
-        logging.info(variables)
         if 'mask' not in variables:
             return self.home()
         
@@ -176,6 +192,12 @@ class DeleteAction(AuthenticatedRequest):
         if pseudo.contact:
             for contact in pseudo.contacts:
                 contact.delete()
+                
+        logging.info("%s deleted mask '%s'" % (
+            user.email(),
+            pseudo.mask
+        ))        
+                
         pseudo.delete()
         
 class DropAction(AuthenticatedRequest):
@@ -203,3 +225,9 @@ class DropAction(AuthenticatedRequest):
         # Perform action
         pseudo.should_drop = not pseudo.should_drop
         pseudo.put()
+        
+        logging.info("%s set drop to '%r' for mask '%s'" % (
+            user.email(),
+            pseudo.should_drop,
+            pseudo.mask
+        ))
