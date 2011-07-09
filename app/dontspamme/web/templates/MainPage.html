@@ -17,7 +17,13 @@
                             <input type='hidden' name='mask' value="{{ pseudo.mask }}" />
                             {% for domain in pseudo.domains %}
                                 <a href='#' onClick='dontspamme.removeDomain(this.parentNode, "{{ domain }}")'>{{ domain }}</a>
-                            {% endfor %})
+                            {% endfor %}
+                            )
+                        </form>
+                        <form action='/adddomain' method='post' >
+                            <input type='hidden' name='domain' />
+                            <input type='hidden' name='mask' value='{{ pseudo.mask }}' />
+                            <a href='#' onClick='dontspamme.addDomain(this.parentNode)'>+</a>
                         </form>
                     </div>
                 </div>

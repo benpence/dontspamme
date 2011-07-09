@@ -8,7 +8,18 @@ dontspamme.checkDomain = function(formNode){
     }
 }
 
-dontspamme.removeDomain = function(formNode, domain_name){
-    formNode['domain'].value = domain_name;
+dontspamme.addDomain = function(formNode){
+    var domain = prompt("Add domain:")
+    
+    if(domain == null && domain == ""){
+        return
+    }
+    
+    formNode['domain'].value = domain;
+    formNode.submit();
+}
+
+dontspamme.removeDomain = function(formNode, domain){
+    formNode['domain'].value = domain;
     formNode.submit();
 }
