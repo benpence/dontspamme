@@ -41,23 +41,74 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_EmailAddress(self):
         expected_results = (
             # Columns
-            ('original', 'name', 'email', 'user', 'contact', 'domain'),
+            (
+                'input',
+                'original',
+                'name',
+                'email',
+                'user',
+                'contact',
+                'domain'
+            ),
 
             # Expected Values
-            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', '', 'pence.com'),
-            ('"Ben Pence" <ben@pence.com>', 'Ben Pence', 'ben@pence.com', 'ben', '', 'pence.com'),
-            ('ben@pence.com', '', 'ben@pence.com', 'ben', '', 'pence.com'),
-            ('"Ben Pence <ben@doo.doc>" <ben@pence.com>', 'Ben Pence <ben@doo.doc>', 'ben@pence.com', 'ben', '', 'pence.com'),
-            ('"Ben Pence <ben+aa@doo.doc>" <ben+bb@pence.com>', 'Ben Pence <ben+aa@doo.doc>', 'ben+bb@pence.com', 'ben', 'bb', 'pence.com'),
+            (
+                '"Ben Pence" <ben@pence.com>',
+                '"Ben Pence" <ben@pence.com>',
+                'Ben Pence',
+                'ben@pence.com',
+                'ben',
+                '',
+                'pence.com'
+            ),(
+                '"Ben Pence" <ben@pence.com>',
+                '"Ben Pence" <ben@pence.com>',
+                'Ben Pence', 'ben@pence.com',
+                'ben',
+                '',
+                'pence.com'
+            ),(
+                'ben@pence.com',
+                'ben@pence.com',
+                '',
+                'ben@pence.com',
+                'ben',
+                '',
+                'pence.com'
+            ),(
+                '"Ben Pence <ben@doo.doc>" <ben@pence.com>',
+                '"Ben Pence <ben@doo.doc>" <ben@pence.com>',
+                'Ben Pence <ben@doo.doc>',
+                'ben@pence.com',
+                'ben',
+                '',
+                'pence.com'
+            ),(
+                '"Ben Pence <ben+aa@doo.doc>" <ben+bb@pence.com>',
+                '"Ben Pence <ben+aa@doo.doc>" <ben+bb@pence.com>',
+                'Ben Pence <ben+aa@doo.doc>',
+                'ben+bb@pence.com',
+                'ben',
+                'bb',
+                'pence.com'
+            ),(
+                '    "Ben   Pence   "   <ben@pence.com   ',
+                '"Ben Pence " <ben@pence.com',
+                'Ben Pence',
+                'ben@pence.com',
+                'ben',
+                '',
+                'pence.com'
+            )
         )
 
         for test_set in expected_results[1:]:
             address = dontspamme.util.EmailAddress(test_set[0])
 
-            for i, property in enumerate(expected_results[0]):
+            for i, property in enumerate(expected_results[0][1:]):
                 self.assertEqual(
                     address.__getattribute__(property),
-                    test_set[i]
+                    test_set[i + 1]
                 )
 
 if __name__ == '__main__':

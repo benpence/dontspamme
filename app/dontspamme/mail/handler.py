@@ -1,6 +1,7 @@
 import logging
 
-from google.appengine.ext import webapp 
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler # Receive
 
 import dontspamme.model as model
@@ -22,32 +23,47 @@ class EmailHandler(InboundMailHandler):
         Args:
             message: InboundEmailMessage
         """
-        logging.debug("Received Mail: \n" + message.original)
-
         # To a pseudonym we know?
         to_address = util.EmailAddress(message.to)
         pseudo = model.get(model.Pseudonym, mask=to_address.user)
 
-        if pseudo:
-            from_stranger(message, pseudo, to_address.email)
+        # Not stranger or reply?
+        if not pseudo:
+            logging.info("MAIL: No such pseudonym")
+            return
+        
+        sender_address = util.EmailAddress(message.sender)
+        
+        # No contact in to address?
+        if not to_address.contact:
+            # Not user emailing their own pseudonym
+            # TODO: Maybe we should change the response?
+            if pseudo.user.email() == sender_address.email:
+                return
+                
+            from_stranger(
+                message,
+                pseudo,
+                util.EmailAddress(message.sender)
+            )
             return
 
-        # A reply to a contact from a user's REAL email?
-        # TODO: Find an efficient way to match real email to datastore (add Pseudonym field?)
-        pseudo = util.first(
-            model.Pseudonym.all(),
-            lambda p: p.email in message.sender
-        )
-
-        if to_address.contact and pseudo:
+        # A reply to a contact, from the user's REAL email?
+        if pseudo.user.email() == sender_address.email:
             from_user(message, pseudo, to_address)
+            return
 
-        # To non-existent user -> do not relay
+        # Not from correct user...
+        logging.info("MAIL: Invalid sender '%s' for reply to '%s+%s'" % (
+            message.sender,
+            pseudo.mask,
+            to_address.contact
+        ))
 
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
     application = webapp.WSGIApplication([EmailHandler.mapping()], debug=True)
-    webapp.util.run_wsgi_app(application)
+    run_wsgi_app(application)
 
 if __name__ == '__main__':
     main()

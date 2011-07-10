@@ -4,7 +4,7 @@ import re
 
 DEFAULT_LENGTH = 16
 
-def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.letters+string.digits):
+def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.uppercase+string.digits):
     """
     @return a random string of length @param length from alphabet @alphabet
     """
@@ -19,16 +19,15 @@ def first(items, test=lambda x: True):
 
 class EmailAddress(object):
     name_pattern = re.compile(
-        r'\"?'
-        r'(?P<name>.(:?[^ \s"]+\s*)+)?'
-        r'\"?'
-        r'\s*'
+        r'\"?\s?'
+        r'(?P<name>(:?[^ \s"]+\s?)+)?'
+        r'\"?\s?'
     )
 
     email_pattern = re.compile(
         r'\<?'
         r'(?P<email>(?P<user>\w+)(:?\+(?P<contact>\w+))?@(?P<domain>(:?\w+\.)+\w+))'
-        r'\>?$'
+        r'\>?\s?$'
     )
     
     def __init__(self, original):
@@ -43,14 +42,16 @@ class EmailAddress(object):
                 contact: After the last '+' but before the '@'
                 domain: After the '@'
         """
-        self.original = original
+        self.original = ' '.join(original.strip().lstrip().split())
 
-        separator = original.rfind(' ') + 1
-
-        m = self.name_pattern.search(original[:separator])
+        separator = self.original.rfind(' ') + 1
+        
+        m = self.name_pattern.search(self.original[:separator])
         self.name = m.group('name') or ''
+        if self.name:
+            self.name = self.name.strip()
 
-        m = self.email_pattern.search(original[separator:])
+        m = self.email_pattern.search(self.original[separator:])
         self.email = m.group('email') or ''
         self.user = m.group('user') or ''
         self.contact = m.group('contact') or ''

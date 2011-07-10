@@ -4,7 +4,7 @@ import dontspamme.util as util
 import dontspamme.model as model
 import dontspamme.config
 
-def from_stranger(self, message, pseudo, stranger_address):
+def from_stranger(message, pseudo, stranger_address):
     """
     Stranger emailing a pseudonym
     New strangers will be added as Contact.
@@ -22,6 +22,7 @@ def from_stranger(self, message, pseudo, stranger_address):
     )
 
     # Create entry if new
+    new_prefix = ''
     if not contact:
         contact = model.Contact(
             pseudonym=pseudo,
@@ -31,13 +32,10 @@ def from_stranger(self, message, pseudo, stranger_address):
         )
         contact.put()
         
-        # Update pseudonym
-        psuedo.contacts.append(contact)
-        pseudo.put()
+        new_prefix = 'New '
 
-        logging.info("New Contact")
-
-    logging.info("Contact: %s -> %s" % (
+    logging.info("%sContact: %s -> %s" % (
+        new_prefix,
         stranger_address.email,
         pseudo.email
     ))
@@ -46,11 +44,10 @@ def from_stranger(self, message, pseudo, stranger_address):
     prepare_message(
         message,
         pseudo,
-        isSpam=stranger_address.domain not in pseudo.domains
+        isSpam=stranger_address.domain.upper() not in pseudo.domains
     )
 
-    message.cc = message.bcc = ''
-    message.to = pseudo.email
+    message.to = pseudo.user.email()
 
     # This is important because it lets the user know WHO EMAILED THEM
     message.sender = "'%s <%s>' <%s+%s@%s>" % (
@@ -65,7 +62,7 @@ def from_stranger(self, message, pseudo, stranger_address):
 
     message.send()
 
-def prepare_message(self, message, pseudo, isSpam=False):
+def prepare_message(message, pseudo, isSpam=False):
     """
     Add header to message body.
 

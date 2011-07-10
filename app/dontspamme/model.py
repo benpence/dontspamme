@@ -36,7 +36,6 @@ class Pseudonym(db.Model):
     mask          = db.StringProperty(multiline=False)    
 
     domains       = db.StringListProperty()
-    contact       = db.ReferenceProperty(Contact, collection_name='contacts')
     should_drop   = db.BooleanProperty()
     
     created       = db.DateTimeProperty(auto_now_add=True)
@@ -62,7 +61,7 @@ class Contact(db.Model):
     # TODO: Allow user of Pseudonym to initiate an email conversation.
     # While this is not what the tool was intended for, it should be possible.
 
-    pseudonym   = db.ReferenceProperty(Pseudonym)
+    pseudonym   = db.ReferenceProperty(Pseudonym, collection_name='contacts')
     mask        = db.StringProperty(multiline=False)
     email       = db.StringProperty(multiline=False)
     name        = db.StringProperty(multiline=False)
