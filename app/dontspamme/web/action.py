@@ -57,7 +57,6 @@ def confirmed_post(post_method):
         Redirects to /
     """
     def wrapper(handler):
-        # TODO: Add logging to confirmed_post
         user = handler.get_valid_user()
         if not user:
             return handler.home()
@@ -149,6 +148,8 @@ class GenerateAction(AuthenticatedRequest):
     @confirmed_post
     def post(self, user, variables):
         if 'domain' not in variables:
+            return self.home()
+        if variables['domain'] == '':
             return self.home()
             
         # Perform action
