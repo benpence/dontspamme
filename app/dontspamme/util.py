@@ -1,6 +1,7 @@
 import string
 import random
 import re
+import cgi
 
 DEFAULT_LENGTH = 16
 
@@ -16,6 +17,21 @@ def first(items, test=lambda x: True):
             return item
 
     return None
+
+def make_get_arguments(**kwargs):
+    """
+    Create dictionary into corresponding URL parameters
+    """
+    if not kwargs:
+        return ''
+    
+    return '?' + '&'.join((
+        '%s=%s' % (
+            key,
+            cgi.escape(str(value))
+        )
+        for key, value in kwargs.items()
+    ))
 
 class EmailAddress(object):
     name_pattern = re.compile(
@@ -42,6 +58,7 @@ class EmailAddress(object):
                 contact: After the last '+' but before the '@'
                 domain: After the '@'
         """
+        self.raw = original
         self.original = ' '.join(original.strip().lstrip().split())
 
         separator = self.original.rfind(' ') + 1

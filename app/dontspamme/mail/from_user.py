@@ -1,8 +1,10 @@
 import logging
+import re
 
 import dontspamme.model as model
+from dontspamme.mail import LINK_REMOVE_CLASS
 
-def from_user(message, pseudo, to_address):
+def handle(message, pseudo, to_address):
     """
     Send reply to contact.
     Sanitize message, verify contact contact mask, send email to contact.
@@ -39,7 +41,7 @@ def from_user(message, pseudo, to_address):
 
 def sanitize_message(message, pseudo, to_address, contact):
     """
-    Remove all traces of User's REAL email address from message body.
+    Change fields of message to hide all exposed data
 
     Args:
         message: InboundEmailMessage
@@ -47,14 +49,26 @@ def sanitize_message(message, pseudo, to_address, contact):
         to_address: EmailAddress
         contact: reply to Contact 
     """
-    # TODO: Refine sanitization to be more flexible (regexes?)
+    replacements = [
+        (re.compile(pattern, re.IGNORECASE), replacement)
+        for pattern, replacement in (
+            # Remove user's real email address
+            (re.escape(pseudo.user.email()), pseudo.email),
+        
+            # Remove contact email if message quoted in reply
+            (re.escape(to_address.raw), contact.email),
+        
+            # Remove 'add to not spam list' link from replies
+            ('\<a class=\"%s\".+\</a\>' % LINK_REMOVE_CLASS, ''),
+        )
+    ]
+    
     for content_type in ('body', 'html'):
         body = getattr(message, content_type).decode()
 
-        # Remove traces of real email address (ie quoted reply)
-        body = body.replace(pseudo.user.email(), pseudo.email)
-        
-        # If message is quoted in reply, don't reveal reply-address
-        body = body.replace(to_address.original, contact.email).encode()
-        
-        setattr(message, content_type, body)
+        for pattern, replacement in replacements:
+            body = pattern.sub(replacement, body)
+
+        logging.info(body)
+
+        setattr(message, content_type, body.encode())

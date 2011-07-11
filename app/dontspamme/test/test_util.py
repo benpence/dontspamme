@@ -38,6 +38,17 @@ class TestSequenceFunctions(unittest.TestCase):
                 test_set[1]
             )
 
+    def test_make_get_arguments(self):
+        expected_results = (
+            ({'x':'y', 'a': 3}, ('?x=y&a=3', '?a=3&x=y')),
+            ({}, ('',)),
+        )
+        
+        for kwargs, expected_result in expected_results:
+            self.assertTrue(
+                dontspamme.util.make_get_arguments(**kwargs) in expected_result
+            )
+
     def test_EmailAddress(self):
         expected_results = (
             # Columns

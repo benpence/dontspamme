@@ -1,14 +1,14 @@
 import logging
 
-from google.appengine.ext import webapp
+from google.appengine.ext import webapp 
+from google.appengine.ext.webapp.mail_handlers import InboundMailHandler 
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.ext.webapp.mail_handlers import InboundMailHandler # Receive
 
 import dontspamme.model as model
 import dontspamme.util as util
 
-from dontspamme.mail.from_user import from_user
-from dontspamme.mail.from_stranger import from_stranger
+from dontspamme.mail import from_stranger
+from dontspamme.mail import from_user
 
 class EmailHandler(InboundMailHandler):
     """
@@ -23,9 +23,11 @@ class EmailHandler(InboundMailHandler):
         Args:
             message: InboundEmailMessage
         """
+        
+        
         # To a pseudonym we know?
         to_address = util.EmailAddress(message.to)
-        pseudo = model.get(model.Pseudonym, mask=to_address.user)
+        pseudo = model.get(model.Pseudonym, mask=to_address.user.upper())
 
         # Not stranger or reply?
         if not pseudo:
@@ -38,10 +40,11 @@ class EmailHandler(InboundMailHandler):
         if not to_address.contact:
             # Not user emailing their own pseudonym
             # TODO: Maybe we should change the response?
-            if pseudo.user.email() == sender_address.email:
+            if pseudo.user.email().upper() == sender_address.email.upper():
+                logging.info("MAIL: User emailed themself")
                 return
                 
-            from_stranger(
+            from_stranger.handle(
                 message,
                 pseudo,
                 util.EmailAddress(message.sender)
@@ -50,7 +53,7 @@ class EmailHandler(InboundMailHandler):
 
         # A reply to a contact, from the user's REAL email?
         if pseudo.user.email() == sender_address.email:
-            from_user(message, pseudo, to_address)
+            from_user.handle(message, pseudo, to_address)
             return
 
         # Not from correct user...
