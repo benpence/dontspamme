@@ -29,14 +29,13 @@ def handle(message, pseudo, stranger_address):
         contact = model.Contact(
             pseudonym=pseudo,
             email=stranger_address.email,
-            mask=util.generate_random_string(),
             name=stranger_address.name
         )
         contact.put()
         
         new_prefix = 'New '
 
-    logging.info("%sContact: %s -> %s" % (
+    logging.info("MAIL: %sContact: %s -> %s" % (
         new_prefix,
         stranger_address.email,
         pseudo.email
@@ -47,7 +46,6 @@ def handle(message, pseudo, stranger_address):
         message,
         pseudo,
         stranger_address,
-        is_spam=stranger_address.domain not in pseudo.domains
     )
     if should_drop:
         return
@@ -62,13 +60,13 @@ def handle(message, pseudo, stranger_address):
 
         pseudo.mask,
         contact.mask,
-        dontspamme.config.domain_name
+        dontspamme.config.mail_domain
     )
 
-    logging.info("Body ======== \n%s" % message.html.decode())
+    logging.debug("Body ======== \n%s" % message.html.decode())
     message.send()
 
-def prepare_message(message, pseudo, stranger_address, is_spam=False):
+def prepare_message(message, pseudo, stranger_address):
     """
     Add header to message body.
 
@@ -76,19 +74,25 @@ def prepare_message(message, pseudo, stranger_address, is_spam=False):
         message: InboundEmailMessage
         pseudo: Pseudoynm of recipient
         domain: domain of sender
-        isSpam: bool = did the message came from one of pseudo's domains
     """
+    
+    is_spam = stranger_address.domain not in pseudo.domains
+    
     # Not spam
     if not is_spam:
         return
     
     # Drop spam
     if pseudo.should_drop:
+        logging.info("MAIL: SPAM dropped")
         return True
+    
+    logging.info("MAIL: SPAM flagged")
         
     # Mark as spam
     message.subject = dontspamme.config.spam_label + ' ' + message.subject
     
+    # Link for adding domain to 'not spam' list
     add_domain_link = create_link(
         stranger_address.email + ' is not spam',
         'adddomain',
@@ -104,14 +108,13 @@ def create_link(title, action, **kwargs):
     """
     Generate link for performing actions via GET requests
     """
-    logging.info(LINK_REMOVE_CLASS)
     return "<a class=\"%s\" href=\"%s\">%s</a>" % (
         # Tag for removing later
         LINK_REMOVE_CLASS,
         
         # Generated link URL
         '/'.join((
-            'http' + dontspamme.config.domain_name,
+            util.prepend_if_absent('http://', dontspamme.config.web_domain),
             action + util.make_get_arguments(**kwargs)
         )),
         

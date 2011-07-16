@@ -59,7 +59,7 @@ def sanitize_message(message, pseudo, to_address, contact):
             (re.escape(to_address.raw), contact.email),
         
             # Remove 'add to not spam list' link from replies
-            ('\<a class=\"%s\".+\</a\>' % LINK_REMOVE_CLASS, ''),
+            ('\<a class=\"%s\".+\</a\>\n?' % LINK_REMOVE_CLASS, ''),
         )
     ]
     
@@ -69,6 +69,6 @@ def sanitize_message(message, pseudo, to_address, contact):
         for pattern, replacement in replacements:
             body = pattern.sub(replacement, body)
 
-        logging.info(body)
+        logging.debug(body)
 
         setattr(message, content_type, body.encode())

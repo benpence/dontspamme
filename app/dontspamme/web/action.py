@@ -91,18 +91,20 @@ class AddDomainAction(AuthenticatedRequest):
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=variables['mask'].upper(),
+            mask=variables['mask'].lower(),
             user=user
         )
         if not pseudo:
             return self.home()
-        if variables['domain'] not in pseudo.domains:
-            pseudo.domains.append(variables['domain'])
+        
+        domain = variables['domain'].lower()
+        if domain not in pseudo.domains:
+            pseudo.domains.append(domain)
             pseudo.put()
             
-            logging.info("%s added '%s' to mask '%s'" % (
+            logging.info("WEB: %s added '%s' to mask '%s'" % (
                 user.email(),
-                variables['domain'],
+                domain,
                 pseudo.mask
             ))
 
@@ -122,18 +124,20 @@ class RemoveDomainAction(AuthenticatedRequest):
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=variables['mask'].upper(),
+            mask=variables['mask'].lower(),
             user=user
         )
         if not pseudo:
             return self.home()
-        if variables['domain'] in pseudo.domains and len(pseudo.domains) > 1:
-            pseudo.domains.remove(variables['domain'])
+            
+        domain = variables['domain'].lower()
+        if domain in pseudo.domains and len(pseudo.domains) > 1:
+            pseudo.domains.remove(domain)
             pseudo.put()
             
-            logging.info("%s removed '%s' from mask '%s'" % (
+            logging.info("WEB: %s removed '%s' from mask '%s'" % (
                 user.email(),
-                variables['domain'],
+                domain,
                 pseudo.mask
             ))
         
@@ -155,13 +159,11 @@ class GenerateAction(AuthenticatedRequest):
         # Perform action
         pseudo = model.Pseudonym(
             user=user,
-            mask=util.generate_random_string().upper(),
-            domains=[variables['domain'].upper()],
-            should_drop=False
+            domains=[variables['domain'].lower()],
         )
         pseudo.put()
         
-        logging.info("%s generated mask '%s' with domain '%s'" % (
+        logging.info("WEB: %s generated mask '%s' with domain '%s'" % (
             user.email(),
             pseudo.mask,
             variables['domain']
@@ -183,18 +185,18 @@ class DeleteAction(AuthenticatedRequest):
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=variables['mask'].upper(),
+            mask=variables['mask'].lower(),
             user=user
         )
         if not pseudo:
             return self.home()
         
         # Perform action
-        if pseudo.contact:
+        if hasattr(pseudo, 'contact'):
             for contact in pseudo.contacts:
                 contact.delete()
                 
-        logging.info("%s deleted mask '%s'" % (
+        logging.info("WEB: %s deleted mask '%s'" % (
             user.email(),
             pseudo.mask
         ))        
@@ -217,7 +219,7 @@ class DropAction(AuthenticatedRequest):
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
-            mask=variables['mask'].upper(),
+            mask=variables['mask'].lower(),
             user=user
         )
         if not pseudo:
@@ -227,7 +229,7 @@ class DropAction(AuthenticatedRequest):
         pseudo.should_drop = not pseudo.should_drop
         pseudo.put()
         
-        logging.info("%s set drop to '%r' for mask '%s'" % (
+        logging.info("WEB: %s set drop to '%r' for mask '%s'" % (
             user.email(),
             pseudo.should_drop,
             pseudo.mask

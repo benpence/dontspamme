@@ -1,5 +1,6 @@
 from google.appengine.ext import db
 
+import dontspamme.util as util
 import dontspamme.config
 
 class User(db.Model):
@@ -33,10 +34,10 @@ class Pseudonym(db.Model):
         created: datetime of creation time
     """
     user          = db.UserProperty()
-    mask          = db.StringProperty(multiline=False)    
+    mask          = db.StringProperty(default=util.generate_random_string(), multiline=False)    
 
     domains       = db.StringListProperty()
-    should_drop   = db.BooleanProperty()
+    should_drop   = db.BooleanProperty(default=False)
     
     created       = db.DateTimeProperty(auto_now_add=True)
 
@@ -45,7 +46,7 @@ class Pseudonym(db.Model):
         """
         Returns pseudonym's full local email address
         """
-        return '%s@%s' % (self.mask, dontspamme.config.domain_name)
+        return '%s@%s' % (self.mask, dontspamme.config.mail_domain)
             
 class Contact(db.Model):
     """
@@ -62,7 +63,8 @@ class Contact(db.Model):
     # While this is not what the tool was intended for, it should be possible.
 
     pseudonym   = db.ReferenceProperty(Pseudonym, collection_name='contacts')
-    mask        = db.StringProperty(multiline=False)
+    mask        = db.StringProperty(default=util.generate_random_string(), multiline=False)
+    
     email       = db.StringProperty(multiline=False)
     name        = db.StringProperty(multiline=False)
     

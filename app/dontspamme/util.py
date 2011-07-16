@@ -5,7 +5,7 @@ import cgi
 
 DEFAULT_LENGTH = 16
 
-def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.uppercase+string.digits):
+def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.lowercase+string.digits):
     """
     @return a random string of length @param length from alphabet @alphabet
     """
@@ -32,6 +32,17 @@ def make_get_arguments(**kwargs):
         )
         for key, value in kwargs.items()
     ))
+
+def prepend_if_absent(prefix, text):
+    if text.startswith(prefix):
+        return
+        
+    return prefix + text
+
+def is_substring_case_insensitive(text, substring):
+    pattern = re.compile(substring, re.IGNORECASE)
+    
+    
 
 class EmailAddress(object):
     name_pattern = re.compile(

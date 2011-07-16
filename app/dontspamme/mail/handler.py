@@ -27,7 +27,7 @@ class EmailHandler(InboundMailHandler):
         
         # To a pseudonym we know?
         to_address = util.EmailAddress(message.to)
-        pseudo = model.get(model.Pseudonym, mask=to_address.user.upper())
+        pseudo = model.get(model.Pseudonym, mask=to_address.user.lower())
 
         # Not stranger or reply?
         if not pseudo:
@@ -40,7 +40,7 @@ class EmailHandler(InboundMailHandler):
         if not to_address.contact:
             # Not user emailing their own pseudonym
             # TODO: Maybe we should change the response?
-            if pseudo.user.email().upper() == sender_address.email.upper():
+            if pseudo.user.email().lower() == sender_address.email.lower():
                 logging.info("MAIL: User emailed themself")
                 return
                 

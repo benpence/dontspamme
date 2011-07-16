@@ -24,7 +24,7 @@ class MainPage(AuthenticatedRequest):
             'MainPage',
             {
                 'pseudos': pseudos,
-                'domain_name': dontspamme.config.domain_name,
+                'web_domain': dontspamme.config.web_domain,
             }
         )
         

@@ -1,4 +1,11 @@
-domain_name = "dontspam.me" # Your domain
-referral_for_non_users = "www.google.com" # Where non-users are referred to if they're logged in
+# Where non-users are referred to if they're logged in
+referral_for_non_users = "www.google.com" 
 
-spam_label = '(SPAM)' # The prefix for subjects of messages that have been flagged as spam
+# The subject-prefix of messages that have been flagged as spam
+spam_label = '(SPAM)' 
+
+
+# CHANGE THESE IF YOU KNOW WHAT YOU'RE DOING
+app = os.getcwd().split('/')[-2]
+web_domain = app + '.appspot.com'
+mail_domain = app + '.appspotmail.com'
