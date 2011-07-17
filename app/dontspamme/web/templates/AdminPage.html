@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
+        <script type="text/javascript" src="/static/js/dontspamme.js"></script>
+        <script type="text/javascript" src="/static/js/dontspamme.page.js"></script>
+    </head>
+    
+    <body>
+        {% for member in members %}
+            {% ifnotequal member admin %}
+        <div class='row'>
+            <div class="title">{{ member.user.email }}</div>
+
+            <form class="actions" action='/deleteuser' method='post' >
+                <input type="hidden" name='email' value='{{ member.user.email }}'/>
+                
+                <a href='#' class='subtitle' onClick='this.parentNode.submit()'>Delete User</a>
+            </form>
+        </div>
+            {% endifnotequal %}
+        {% endfor %}
+        
+        <form action='/adduser' method='post' >
+            <input type='hidden' name='email' />
+            
+            <a href='#' class="actions" onClick='dontspamme.page.submitByPrompt(this.parentNode, "email")'>Add User</a>
+        </form>
+    </body>
+</html>

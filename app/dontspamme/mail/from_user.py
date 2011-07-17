@@ -53,7 +53,7 @@ def sanitize_message(message, pseudo, to_address, contact):
         (re.compile(pattern, re.IGNORECASE), replacement)
         for pattern, replacement in (
             # Remove user's real email address
-            (re.escape(pseudo.user.email()), pseudo.email),
+            (re.escape(pseudo.member.user.email()), pseudo.email),
         
             # Remove contact email if message quoted in reply
             (re.escape(to_address.raw), contact.email),

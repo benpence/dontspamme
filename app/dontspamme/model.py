@@ -3,21 +3,26 @@ from google.appengine.ext import db
 import dontspamme.util as util
 import dontspamme.config
 
-class User(db.Model):
+class Member(db.Model):
     """
-    A user associated with this app. Primary function is to disallow other
+    A member associated with this app. Primary function is to disallow other
     users from using app.
 
     Attributes:
         user: Google user
     """
-    user        = db.UserProperty()
+    user         = db.UserProperty()
+    
+    def __eq__(self, other):
+        if isinstance(other, Member):
+            return self.user == other.user
+        return NotImplemented
 
-class Contact(db.Model):
-    """
-    Prototype
-    """
-    pass
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
 class Pseudonym(db.Model):
     """
@@ -33,8 +38,8 @@ class Pseudonym(db.Model):
             False -> flag emails from invalid contacts
         created: datetime of creation time
     """
-    user          = db.UserProperty()
-    mask          = db.StringProperty(default=util.generate_random_string(), multiline=False)    
+    member        = db.ReferenceProperty(Member, collection_name='pseudonyms')
+    mask          = db.StringProperty(multiline=False)    
 
     domains       = db.StringListProperty()
     should_drop   = db.BooleanProperty(default=False)
@@ -63,7 +68,7 @@ class Contact(db.Model):
     # While this is not what the tool was intended for, it should be possible.
 
     pseudonym   = db.ReferenceProperty(Pseudonym, collection_name='contacts')
-    mask        = db.StringProperty(default=util.generate_random_string(), multiline=False)
+    mask        = db.StringProperty(multiline=False)
     
     email       = db.StringProperty(multiline=False)
     name        = db.StringProperty(multiline=False)

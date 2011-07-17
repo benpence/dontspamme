@@ -29,7 +29,8 @@ def handle(message, pseudo, stranger_address):
         contact = model.Contact(
             pseudonym=pseudo,
             email=stranger_address.email,
-            name=stranger_address.name
+            name=stranger_address.name,
+            mask=util.generate_random_string(),
         )
         contact.put()
         
@@ -50,7 +51,7 @@ def handle(message, pseudo, stranger_address):
     if should_drop:
         return
 
-    message.to = pseudo.user.email()
+    message.to = pseudo.member.user.email()
 
     # This is important because it lets the user know WHO EMAILED THEM
     message.sender = "'%s <%s>' <%s+%s@%s>" % (

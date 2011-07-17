@@ -1,5 +1,6 @@
-import cgi
 import logging
+
+from google.appengine.api.users import User
 
 import dontspamme.util as util
 import dontspamme.model as model
@@ -22,20 +23,21 @@ class confirm_get(object):
             """
             URL in the format domain/action?p=X
             """
-            user = handler.get_valid_user()
-            if not user:
-                return handler.home()
+            member = handler.get_valid_member()
+            if not member:
+                return handler.HOME
             
             variables = handler.get_post_dict()
             """
             Run get method
             Allow get method to 'break out' of response by returning False
             Params:
-                user: current Google user
+                member: current Google user
                 variables: dict of get variables
             """
-            if get_method(handler, user, variables) == False:
-                return handler.home()
+            redirect = get_method(handler, member, variables)
+            if redirect:
+                return handler.redirect(redirect)
     
             # Render confirmation template
             handler.render_template(
@@ -57,21 +59,23 @@ def confirmed_post(post_method):
         Redirects to /
     """
     def wrapper(handler):
-        user = handler.get_valid_user()
-        if not user:
-            return handler.home()
+        member = handler.get_valid_member()
+        if not member:
+            return handler.HOME
         
         variables = handler.get_post_dict()
         """
         Run post method
         Params:
-            user: current Google user
+            member: current Google user
             variables: dict of get variables
         """
-        post_method(handler, user, variables)
+        redirect = post_method(handler, member, variables)
+        if redirect:
+            return handler.redirect(redirect)
             
         # TODO: Add in post data to acknowledge delete
-        return handler.home()
+        return handler.redirect(handler.HOME)
         
     return wrapper
 
@@ -80,22 +84,22 @@ class AddDomainAction(AuthenticatedRequest):
     Delete a domain from a Pseudonym
     """
     @confirm_get('adddomain', "add the domain '%(domain)s' to the Pseudonym '%(mask)s'")
-    def get(self, user, variables):
+    def get(self, member, variables):
         pass
 
     @confirmed_post
-    def post(self, user, variables):
+    def post(self, member, variables):
         if 'mask' not in variables or 'domain' not in variables:
-            return self.home()
+            return self.HOME
 
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
             mask=variables['mask'].lower(),
-            user=user
+            member=member
         )
         if not pseudo:
-            return self.home()
+            return self.HOME
         
         domain = variables['domain'].lower()
         if domain not in pseudo.domains:
@@ -103,32 +107,32 @@ class AddDomainAction(AuthenticatedRequest):
             pseudo.put()
             
             logging.info("WEB: %s added '%s' to mask '%s'" % (
-                user.email(),
+                member.user.email(),
                 domain,
                 pseudo.mask
             ))
 
-class RemoveDomainAction(AuthenticatedRequest):
+class DeleteDomainAction(AuthenticatedRequest):
     """
     Delete a domain from a Pseudonym
     """
     @confirm_get('removedomain', "remove the domain '%(domain)s' from the Pseudonym '%(mask)s'")
-    def get(self, user, variables):
+    def get(self, member, variables):
         pass
         
     @confirmed_post
-    def post(self, user, variables):
+    def post(self, member, variables):
         if 'mask' not in variables or 'domain' not in variables:
-            return self.home()
+            return self.HOME
         
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
             mask=variables['mask'].lower(),
-            user=user
+            member=member
         )
         if not pseudo:
-            return self.home()
+            return self.HOME
             
         domain = variables['domain'].lower()
         if domain in pseudo.domains and len(pseudo.domains) > 1:
@@ -136,101 +140,159 @@ class RemoveDomainAction(AuthenticatedRequest):
             pseudo.put()
             
             logging.info("WEB: %s removed '%s' from mask '%s'" % (
-                user.email(),
+                member.user.email(),
                 domain,
                 pseudo.mask
             ))
         
-class GenerateAction(AuthenticatedRequest):
+class AddPseudonymAction(AuthenticatedRequest):
     """
     Create a new Pseudonym action
     """
-    @confirm_get('generate', "create a new Pseudonym with domain '%(domain)s'")
-    def get(self, user, variables):
+    @confirm_get('addpseudonym', "create a new Pseudonym with domain '%(domain)s'")
+    def get(self, member, variables):
         pass
     
     @confirmed_post
-    def post(self, user, variables):
+    def post(self, member, variables):
         if 'domain' not in variables:
-            return self.home()
+            return self.HOME
         if variables['domain'] == '':
-            return self.home()
+            return self.HOME
             
         # Perform action
         pseudo = model.Pseudonym(
-            user=user,
+            member=member,
             domains=[variables['domain'].lower()],
+            mask=util.generate_random_string()
         )
         pseudo.put()
         
         logging.info("WEB: %s generated mask '%s' with domain '%s'" % (
-            user.email(),
+            member.user.email(),
             pseudo.mask,
             variables['domain']
         ))
 
-class DeleteAction(AuthenticatedRequest):
+class DeletePseudonymAction(AuthenticatedRequest):
     """
     Delete a Pseudonym action
     """
-    @confirm_get('delete', "delete the Pseudonym '%(mask)s'")
-    def get(self, user, variables):
+    @confirm_get('deletepseudonym', "delete the Pseudonym '%(mask)s'")
+    def get(self, member, variables):
         pass
         
     @confirmed_post
-    def post(self, user, variables):
+    def post(self, member, variables):
         if 'mask' not in variables:
-            return self.home()
+            return self.HOME
         
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
             mask=variables['mask'].lower(),
-            user=user
+            member=member
         )
         if not pseudo:
-            return self.home()
+            return self.HOME
         
         # Perform action
-        if hasattr(pseudo, 'contact'):
-            for contact in pseudo.contacts:
-                contact.delete()
+        for contact in pseudo.contacts:
+            contact.delete()
                 
         logging.info("WEB: %s deleted mask '%s'" % (
-            user.email(),
+            member.user.email(),
             pseudo.mask
         ))        
                 
         pseudo.delete()
         
-class DropAction(AuthenticatedRequest):
+class DropPseudonymAction(AuthenticatedRequest):
     """
     Toggle a Pseudonym's should_drop attribute
     """
-    @confirm_get('drop', "change spam email discarding for the Pseudonym '%(mask)s'")
-    def get(self, user, variables):
+    @confirm_get('droppseudonym', "change spam email discarding for the Pseudonym '%(mask)s'")
+    def get(self, member, variables):
         pass
           
     @confirmed_post
-    def post(self, user, variables):        
+    def post(self, member, variables):        
         if 'mask' not in variables:
-            return self.home()
+            return self.HOME
         
         # Pseudonym in db?    
         pseudo = model.get(
             model.Pseudonym,
             mask=variables['mask'].lower(),
-            user=user
+            member=member
         )
         if not pseudo:
-            return self.home()
+            return self.HOME
         
         # Perform action
         pseudo.should_drop = not pseudo.should_drop
         pseudo.put()
         
         logging.info("WEB: %s set drop to '%r' for mask '%s'" % (
-            user.email(),
+            member.user.email(),
             pseudo.should_drop,
             pseudo.mask
         ))
+
+class AddUserAction(AuthenticatedRequest):
+    @confirm_get('adduser', "add the user '%(email)s' to the users list")
+    def get(self):
+        pass
+        
+    @confirmed_post
+    def post(self, member, variables):
+        if 'email' not in variables:
+            return '/admin'
+        
+        user = User(variables['email'].lower())
+        
+        # TODO: Add error checking for non-existent users    
+        # User already in db?
+        member = model.get(
+            model.Member,
+            user=user
+        )
+        if member:
+            return '/admin'
+            
+        # Perform add
+        model.Member(user=user).put()
+        
+        logging.info("WEB: Added member '%s'" % variables['email'])
+        
+        return '/admin'
+    
+class DeleteUserAction(AuthenticatedRequest):
+    @confirm_get('deleteuser', "delete the user '%(email)s from the users list")
+    def get(self):
+        pass
+    
+    @confirmed_post
+    def post(self, member, variables):
+        if 'email' not in variables:
+            return '/admin'
+            
+        # TODO: Add error checking for non-existent users
+        # User in db?
+        member = model.get(
+            model.Member,
+            user=User(variables['email'].lower())
+        )
+        if not member:
+            return '/admin'
+        
+        # Perform deletion
+        for pseudo in member.pseudonyms:
+            for contact in pseudo.contacts:
+                contact.delete()
+            pseudo.delete()
+        member.delete()
+        
+        logging.info("WEB: Deleted member '%s'" % variables['email'])
+        
+        return '/admin'

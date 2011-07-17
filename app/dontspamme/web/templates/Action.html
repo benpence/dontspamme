@@ -1,20 +1,19 @@
 <html>
     <head>
+        <script type="text/javascript" src="/static/js/dontspamme.js"></script>
+        <script type="text/javascript" src="/static/js/dontspamme.action.js"></script>
         <script type="text/javascript">
             function askForConfirmation(){
-                if(confirm("Are you sure you want to {{ confirmation }}?")){
-                    document.confirmation.submit();
-                } else {
-                    window.location = '/';
-                }
+                dontspamme.action.confirm("{{ confirmation }}")
             }
         </script>
     </head>
     
-    <body onLoad='askForConfirmation()'>
+    <body onLoad="askForConfirmation()">
         <form name='confirmation' action='/{{ action }}' method='post'>
         {% for pair in post_variables.items %}
-            <input type='hidden' name='{{ pair.0 }}' value='{{ pair.1 }}' />
+        
+        <input type='hidden' name='{{ pair.0 }}' value='{{ pair.1 }}' />
         {% endfor %}
         </form>
     </body>

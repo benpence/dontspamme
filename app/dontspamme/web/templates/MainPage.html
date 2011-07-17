@@ -1,52 +1,68 @@
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
         <script type="text/javascript" src="/static/js/dontspamme.js"></script>
+        <script type="text/javascript" src="/static/js/dontspamme.page.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
     </head>
-    
+
     <body>
         {% for pseudo in pseudos %}
-            <div class='pseudonym_row'>
-                <div>
-                    <div class="pseudonym_title">
-                        {{ pseudo.mask }}@{{ mail_domain }}
-                    </div>
-                    <div class="pseudonym_domain">
-                        <form action='/removedomain' method='post'>
+        <div class='row'>
+            <div class="title">{{ pseudo.mask }}@{{ mail_domain }}</div>
+            
+            <table class='subtitle'>
+                <tr>
+                    <td>
+                        <form action='/deletedomain' method='post'>
                             (<input type='hidden' name='domain' />
                             <input type='hidden' name='mask' value="{{ pseudo.mask }}" />
                             {% for domain in pseudo.domains %}
-                                <a href='#' onClick='dontspamme.removeDomain(this.parentNode, "{{ domain }}")'>{{ domain }}</a>
+                                <a href='#' onClick='dontspamme.page.submitWithValue(this.parentNode, "domain", "{{ domain }}")'>{{ domain }}</a>
                             {% endfor %}
                             )
                         </form>
+                    </td>
+                
+                    <td>
                         <form action='/adddomain' method='post' >
                             <input type='hidden' name='domain' />
                             <input type='hidden' name='mask' value='{{ pseudo.mask }}' />
-                            <a href='#' onClick='dontspamme.addDomain(this.parentNode)'>+</a>
+                            <a href='#' onClick='dontspamme.page.submitByPrompt(this.parentNode, "domain")'>+</a>
                         </form>
-                    </div>
-                </div>
-                <form action='/drop' method='post'>
-                    <input type='hidden' name='mask' value='{{ pseudo.mask }}'/>
-                    <a href='#' onClick='this.parentNode.submit()'>
-                        {% if pseudo.should_drop %}
-                            Flag Spam
-                        {% else %}   
-                            Drop Spam
-                        {% endif %} 
-                    </a>
-                </form>
-                <form action='/delete' method='post'>
-                    <input type='hidden' name='mask' value='{{ pseudo.mask }}'/>
-                    <a href='#' onClick='this.parentNode.submit()'>Delete Email</a>
-                </form>
-            </div>
+                    </td>
+                </tr>
+            </table>
+            
+            <table class='actions'>
+                <tr>
+                    <td>
+                        <form action='/droppseudonym' method='post'>
+                            <input type='hidden' name='mask' value='{{ pseudo.mask }}'/>
+                            <a href='#' onClick='this.parentNode.submit()'>
+                                {% if pseudo.should_drop %}
+                                    Flag Spam
+                                {% else %}   
+                                    Drop Spam
+                                {% endif %} 
+                            </a>
+                        </form>
+                    </td>
+                
+                    <td>
+                        <form action='/deletepseudonym' method='post'>
+                            <input type='hidden' name='mask' value='{{ pseudo.mask }}' />
+                            <a href='#' onClick='this.parentNode.submit()'>Delete Email</a>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
         {% endfor %}
         
-        <form action='/generate' method='post'>
-            <input id='generate' type="text" name='domain' />
-            <a href='#' onClick='dontspamme.checkDomain(this.parentNode)'>Generate New Pseudonym</a>
+        <form action='/addpseudonym' method='post'>
+            <input id='generate' type="hidden" name='domain' />
+            <a href='#' class="actions" onClick='dontspamme.page.submitByPrompt(this.parentNode, "domain")'>Generate New Pseudonym</a>
         </form>
     </body>
 </html>

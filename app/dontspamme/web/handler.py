@@ -4,7 +4,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from dontspamme.web.page import MainPage, AdminPage
-from dontspamme.web.action import GenerateAction, DeleteAction, DropAction, AddDomainAction, RemoveDomainAction
+from dontspamme.web.action import AddPseudonymAction, DeletePseudonymAction, DropPseudonymAction, AddDomainAction, DeleteDomainAction, AddUserAction, DeleteUserAction
 
 application = webapp.WSGIApplication(
     [
@@ -14,10 +14,14 @@ application = webapp.WSGIApplication(
         
         # Actions
         ('/adddomain.*', AddDomainAction),
-        ('/removedomain.*', RemoveDomainAction),
-        ('/generate.*', GenerateAction),
-        ('/delete.*', DeleteAction),
-        ('/drop.*', DropAction),
+        ('/deletedomain.*', DeleteDomainAction),
+        
+        ('/addpseudonym.*', AddPseudonymAction),
+        ('/deletepseudonym.*', DeletePseudonymAction),
+        ('/droppseudonym.*', DropPseudonymAction),
+        
+        ('/adduser.*', AddUserAction),
+        ('/deleteuser.*', DeleteUserAction),
         
         # Catch all
         ('/.*', webapp.RedirectHandler.new_factory('/'))

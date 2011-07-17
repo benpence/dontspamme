@@ -1,25 +1,10 @@
 var dontspamme = new Object();
 
-dontspamme.checkDomain = function(formNode){
-    var textNode = formNode.firstChild;
-    
-    if(textNode.value != ''){
-        formNode.submit();
-    }
-}
-
-dontspamme.addDomain = function(formNode){
-    var domain = prompt("Add domain:")
-    
-    if(domain == null && domain == ""){
-        return
-    }
-    
-    formNode['domain'].value = domain;
-    formNode.submit();
-}
-
-dontspamme.removeDomain = function(formNode, domain){
-    formNode['domain'].value = domain;
-    formNode.submit();
-}
+/* Check if the 'email' is well constructed
+ * http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+ */
+dontspamme.isValidEmail = function(email){    
+    return email.match(
+         /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    )
+};

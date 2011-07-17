@@ -40,7 +40,7 @@ class EmailHandler(InboundMailHandler):
         if not to_address.contact:
             # Not user emailing their own pseudonym
             # TODO: Maybe we should change the response?
-            if pseudo.user.email().lower() == sender_address.email.lower():
+            if pseudo.member.user.email().lower() == sender_address.email.lower():
                 logging.info("MAIL: User emailed themself")
                 return
                 
@@ -52,7 +52,7 @@ class EmailHandler(InboundMailHandler):
             return
 
         # A reply to a contact, from the user's REAL email?
-        if pseudo.user.email() == sender_address.email:
+        if pseudo.member.user.email() == sender_address.email:
             from_user.handle(message, pseudo, to_address)
             return
 

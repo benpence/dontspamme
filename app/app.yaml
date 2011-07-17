@@ -1,9 +1,12 @@
-application: bmpence
+application: dontspamme
 version: 1
 runtime: python
 api_version: 1
 
 handlers:
+- url: /test.*
+  script: gaeunit.py    
+    
 - url: /_ah/mail/.+ 
   script: dontspamme/mail/handler.py
   login: admin
@@ -14,6 +17,7 @@ handlers:
 - url: /.*
   script: dontspamme/web/handler.py
   login: required
+  secure: always
 
 inbound_services:
 - mail

@@ -40,8 +40,7 @@ def prepend_if_absent(prefix, text):
     return prefix + text
 
 def is_substring_case_insensitive(text, substring):
-    pattern = re.compile(substring, re.IGNORECASE)
-    
+    pattern = re.compile(substring, re.IGNORECASE)    
     
 
 class EmailAddress(object):

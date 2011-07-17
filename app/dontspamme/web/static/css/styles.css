@@ -6,33 +6,46 @@ form {
     margin: 0px;
 }
 
-.pseudonym_row {
+a {
+    text-decoration: none;
+}
+
+.row {
     margin: 8px 0px 8px 2px;
     padding: 4px;
     border: 1px solid #eee;
 }
 
-.pseudonym_title {
+.title {
     text-transform: uppercase;
+    /* text-decoration: underline; */
     font-weight: bold;
     font-size: 13px;
 }
 
-.pseudonym_domain {
+.subtitle {
+    text-decoration: none;
     text-transform: uppercase;
     font-size: 11px;
     color: #999;
 }
-
-.pseudonym_domain a:hover {
+.subtitle a {
+    text-transform: uppercase;
+    font-size: 11px;
+}
+.subtitle a:hover {
     text-decoration: line-through;
 }
-
-.pseudonym_domain a:visited {
+.subtitle a:visited {
     color: #999;
 }
 
-.pseudonym_row a {
+.actions {
+    text-decoration: underline;
     text-transform: uppercase;
     font-size: 11px;
+}
+
+table {
+    border-spacing:0px;
 }
