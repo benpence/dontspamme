@@ -1,23 +1,29 @@
-import logging
 import json
 import re
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
-
+import dontsspamme.util as util
 import dontspamme.model as model
-from dontspamme.web.authenticate import AuthenticatedRequest
 import dontspamme.web.api.decorate as decorate
+from dontspamme.web.api.meta import save_child_methods
 import dontspamme.web.api.constraint as constraint
 import dontspamme.web.api.exception as exception
+
+class APIHandler(object):
+    """
+    Metaclass redirects post requests to the appropriate method in the handler
+    """
+    __metaclass__ = APIHandlerFactory
     
-class APIHandler(webapp.RequestHandler):
-    pass
+    def write(self, dictionary):
+        self.request.out.write(json.dumps(dictionary))
+
+    def error(self, message):
+        self.write({'error': message})
     
 class MemberHandler(APIHandler):
     @decorate.is_admin
     @decorate.read_options('user')
-    def get(self, member, *exposed_arguments):
+    def read(self, member, *exposed_arguments):
         return model.Member.all()
     
     @decorate.is_admin
@@ -29,37 +35,53 @@ class MemberHandler(APIHandler):
     @decorate.is_admin
     @decorate.write_options(email=constraint.is_valid_email)
     def remove(self, member, email=None):
-        remove_member = model.get(
+        member_to_remove = model.get(
             model.Member,
             email=email
         )
         
-        if not remove_member:
+        if not member_to_remove:
             raise exception.APINoKeyError("Member")
         
-        if remove_member.user.email() == member.email():
+        if member_to_remove.user.email() == member.email():
             raise exception.APIValueContraintError("Member: cannot remove yourself")
             
-        for pseudo in remove_member.pseudonyms:
+        for pseudo in member_to_remove.pseudonyms:
             for contact in pseudo.contacts:
                 contact.delete()
             pseudo.delete()
-        remove_member.delete()
+        member_to_remove.delete()
     
 class PseudonymHandler(APIHandler):
     @decorate.is_member
     @decorate.read_options('mask', 'domains', 'should_drop', mask=str)
-    def get(self, member, *exposed_arguments, mask=None):
+    def read(self, member, *exposed_arguments, mask=None):
         return model.get(model.Pseudonym, member=member, mask=mask)
     
     @decorate.is_member
-    @decorate.write_options(mask=str, domain=constraint.is_valid_domain)
-    def add(self, member, mask=None, domain=None):
+    @decorate.write_options(domain=constraint.is_valid_domain)
+    def add(self, member, domain=None):
+        pseudo = model.Pseudonym(
+            mask=util.generate_random_string(),
+            member=member,
+            domain=[domain.lower()]
+        )
+        pseudo.put()
     
     @decorate.is_member    
-    @decorate.write_options(mask=str, domain=constraint.is_valid_domain)
-    def remove(self, member, mask=None, domain=None):
+    @decorate.write_options(mask=str)
+    def remove(self, member, mask=None):
+        pseudo = model.get(
+            mask=mask,
+            member=member
+        )
         
+        if not pseudo:
+            raise exception.APINoKeyError("Pseudonym")
+
+        for contact in pseudo.contacts():
+            contacts.delete()
+        pseudo.delete()
     
     @decorate.is_member    
     @decorate.write_options(mask=str, should_drop=bool)
@@ -91,7 +113,7 @@ class DomainHandler(APIHandler):
         
         pseudo.domains.append(domain)
         pseudo.put()
-    
+
     @decorate.is_member
     @decorate.write_options(mask=str, domain=constraint.is_valid_domain)
     def remove(self, member, mask=None, domain=None):

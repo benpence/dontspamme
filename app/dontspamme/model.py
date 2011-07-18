@@ -75,16 +75,21 @@ class Contact(db.Model):
     
     created     = db.DateTimeProperty(auto_now_add=True)
 
-def get(cls, count=None, **kwargs):
+def constrain(cls, **kwargs):
     q = cls.all()
 
     for key, value in kwargs.items():
         q.filter(key + ' =', value)
     
+    return q
+
+def get(cls, count=1, **kwargs):
+    q = query(cls, **kwargs)
+    
     if count == 1:
         return q.get()
-
+        
     if count > 1:
         return q.fetch(count)
-    
+        
     return q

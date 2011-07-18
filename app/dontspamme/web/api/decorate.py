@@ -1,70 +1,74 @@
 import dontspamme.web.api.exception as exception
 
-handler_method = lambda decorator: lambda method: lambda handler: decorator(handler, method)
-handler_method_with_state = lambda decorator: lambda *args, **kwargs: lambda method: lambda handler: decorator(handler, method, *args, **kwargs)
-
-@handler_method
-def catch_errors(handler, method):
+def stateless_decorator(decorator):
     """
-    Verifies that the user is a member of this app
-    Validates 'get' parameter 'p'
-    Runs the post method (modifies the datastore)
-    """    
-    try:
-        output = f()
-    except APIError, e:
-        logging.info(e)
+    Decorator that does not take arguments
+        Allows stacking on an instance method
+    """
+    def decorator_replacement(decorated_method):
+        def instance_method(self, *instance_args, **instance_kwargs):
+            decorator(*((self, decorated_method) + instance_args), **instance_kwargs.items())
+        return instance_method
+    return initialized_decorator
 
-        return json.dumps({
-            'error': e
-        })
+def stateful_decorator(decorator):
+    """
+    Decorator that takes arguments
+        Allows stacking on an instance method
+        Arguments passed to the decorator method come before the initialization args/kwargs
+    """
+    def uninitialized_decorator(*dec_args, **dec_kwargs):
+        def initialized_decorator(decorated_method):
+            def instance_method(self, *instance_args, **instance_kwargs):
+                decorator(*((self, decorated_method) + instance_args + dec_args), **dict(instance_kwargs.items() + dec_kwargs.items()))
+            return instance_method
+        return initialized_decorator
+    return uninitialized_decorator
 
-    return json.dumps(output)
-
-@handler_method
+@stateless_decorator
 def is_admin(handler, method):
-    """
-    
-    """
     member = handler.get_admin_member()
     if not member:
         raise exception.APIAuthorizationError()
     
     method(handler, member)
 
-@handler_method    
+@stateless_decorator    
 def is_member(handler, method):
-    """
-
-    """
     member = handler.get_valid_member()
     if not member:
         raise exception.APIAuthorizationError()
     
     method(handler, member)
 
-@handler_with_state
-def read_options(handler, member, *exposed_arguments, **optional_filters):
+@stateful_decorator
+def read_options(handler, method, member, *exposed_arguments, **optional_filters):
     """
-    Decorator for retriev
+    Decorator for retrieving objects from the database
+    
+    Args:
         exposed_arguments: tuple that contains attributes to be returned to client
         optional_filters: dictionary that specifies the requirements for optionally included filters (server side filtering)
     """
     received_arguments = handler.get_post_dict()
     
     for key, value in received_arguments:
-        if key not in optionals:
+        if key not in optional_filters:
             raise exception.APIMissingKeyError( , key)
         
         try:
-            optionals[key] = optionals[key](value)
-        except ValueError, e:
-            raise exception.APIValueError()
+            optional_filters[key] = optional_filters[key](value)
+        except ValueError:
+            raise exception.APIValueError(key, optional_filters[key])
             
-    method(handler, member, *exposed_argumentsd, **optional_filters)
+    method(handler, member, *exposed_arguments, **optional_filters)
 
-@handler_method_with_state
-def write_options(handler, action, **requirements):
+@stateful_decorator
+def write_options(handler, method, member, **requirements):
+    """
+    Args:
+        requirements: dict of argument name to a method that checks and converts its type for accessing/modifying the app
+    """
     received_arguments = handler.get_post_dict()
 
     for key, value in requirements:
@@ -73,8 +77,7 @@ def write_options(handler, action, **requirements):
 
         try:
             received_arguments[key] = requirements[key](value)
+        except ValueError:
+            raise exception.APIValueError(key, requirements[key])
 
-        except ValueError, e:
-            raise exception.APIValueError( , key, requirement_type)
-
-    action(handler, member, *args, **requirements)
+    method(handler, member, **requirements)

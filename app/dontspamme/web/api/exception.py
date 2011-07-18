@@ -20,10 +20,9 @@ class APIMissingKeyError(APIError):
 class APIValueError(APIError):
     """Passed value did not match expected value type"""
     def __init__(self, object_name, key_name, value_type):
-        self.value = "%s: expects '%s' to be '%s'" % (
-            object_name,
+        self.value = "'%s' must be '%s'" % (
             key_name,
-            value_type
+            value_type.__name__
         )
 
 class APIValueConstraintError(APIError):
@@ -38,4 +37,4 @@ class APIAuthorizationError(APIError):
         
 class APINoKeyError(APIError):
     def __init__(self, object_name):
-        self.value = "%s: key is not valid" % object_name
+        self.value = "%s: value not found" % object_name

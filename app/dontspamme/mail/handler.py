@@ -27,7 +27,7 @@ class EmailHandler(InboundMailHandler):
         
         # To a pseudonym we know?
         to_address = util.EmailAddress(message.to)
-        pseudo = model.get(model.Pseudonym, 1, mask=to_address.user.lower())
+        pseudo = model.get(model.Pseudonym, mask=to_address.user.lower())
 
         # Not stranger or reply?
         if not pseudo:
