@@ -81,7 +81,10 @@ def get(cls, count=None, **kwargs):
     for key, value in kwargs.items():
         q.filter(key + ' =', value)
     
-    if count:
-        return q.fetch(count)
+    if count == 1:
+        return q.get()
 
-    return q.get()
+    if count > 1:
+        return q.fetch(count)
+    
+    return q

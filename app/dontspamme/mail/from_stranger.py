@@ -18,7 +18,7 @@ def handle(message, pseudo, stranger_address):
         stranger_email: str in 'x@x' format
     """
     contact = model.get(
-        model.Contact,
+        model.Contact, 1,
         pseudonym=pseudo,
         email=stranger_address.email
     )

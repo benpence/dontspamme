@@ -15,7 +15,7 @@ def handle(message, pseudo, to_address):
         to_address: recipient
     """
     contact = model.get(
-        model.Contact,
+        model.Contact, 1,
         pseudonym=pseudo,
         mask=to_address.contact
     )

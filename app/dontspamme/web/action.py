@@ -94,7 +94,7 @@ class AddDomainAction(AuthenticatedRequest):
 
         # Pseudonym in db?    
         pseudo = model.get(
-            model.Pseudonym,
+            model.Pseudonym, 1,
             mask=variables['mask'].lower(),
             member=member
         )
@@ -127,7 +127,7 @@ class DeleteDomainAction(AuthenticatedRequest):
         
         # Pseudonym in db?    
         pseudo = model.get(
-            model.Pseudonym,
+            model.Pseudonym, 1,
             mask=variables['mask'].lower(),
             member=member
         )
@@ -189,7 +189,7 @@ class DeletePseudonymAction(AuthenticatedRequest):
         
         # Pseudonym in db?    
         pseudo = model.get(
-            model.Pseudonym,
+            model.Pseudonym, 1,
             mask=variables['mask'].lower(),
             member=member
         )
@@ -222,7 +222,7 @@ class DropPseudonymAction(AuthenticatedRequest):
         
         # Pseudonym in db?    
         pseudo = model.get(
-            model.Pseudonym,
+            model.Pseudonym, 1,
             mask=variables['mask'].lower(),
             member=member
         )
@@ -254,7 +254,7 @@ class AddUserAction(AuthenticatedRequest):
         # TODO: Add error checking for non-existent users    
         # User already in db?
         member = model.get(
-            model.Member,
+            model.Member, 1,
             user=user
         )
         if member:
@@ -280,7 +280,7 @@ class DeleteUserAction(AuthenticatedRequest):
         # TODO: Add error checking for non-existent users
         # User in db?
         member = model.get(
-            model.Member,
+            model.Member, 1,
             user=User(variables['email'].lower())
         )
         if not member:
