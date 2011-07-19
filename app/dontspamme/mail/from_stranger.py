@@ -95,14 +95,14 @@ def prepare_message(message, pseudo, stranger_address):
     
     # Link for adding domain to 'not spam' list
     add_domain_link = create_link(
-        stranger_address.email + ' is not spam',
+        'Mail from ' + stranger_address.domain + ' is not spam',
         'adddomain',
         mask=pseudo.mask,
         domain=stranger_address.domain
     )
     
     body = message.html.decode()    
-    body = add_domain_link + '\n' + body
+    body = add_domain_link + '<br />' + body
     message.html = body.encode()
     
 def create_link(title, action, **kwargs):

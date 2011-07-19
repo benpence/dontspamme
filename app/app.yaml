@@ -1,12 +1,9 @@
 application: dontspamme
-version: 1
+version: 11-7
 runtime: python
 api_version: 1
 
 handlers:
-- url: /test.*
-  script: gaeunit.py    
-    
 - url: /_ah/mail/.+ 
   script: dontspamme/mail/handler.py
   login: admin

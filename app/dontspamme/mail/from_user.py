@@ -2,6 +2,7 @@ import logging
 import re
 
 import dontspamme.model as model
+import dontspamme.config
 from dontspamme.mail import LINK_REMOVE_CLASS
 
 def handle(message, pseudo, to_address):
@@ -56,13 +57,14 @@ def sanitize_message(message, pseudo, to_address, contact):
             (re.escape(pseudo.member.user.email()), pseudo.email),
         
             # Remove contact email if message quoted in reply
-            (re.escape(to_address.raw), contact.email),
+            (re.escape(to_address.name[1:-1]), ''),
+            (re.escape(to_address.email), contact.email),
         
             # Remove 'add to not spam list' link from replies
             ('\<a class=\"%s\".+\</a\>\n?' % LINK_REMOVE_CLASS, ''),
         )
     ]
-    
+
     for content_type in ('body', 'html'):
         body = getattr(message, content_type).decode()
 
@@ -72,3 +74,7 @@ def sanitize_message(message, pseudo, to_address, contact):
         logging.debug(body)
 
         setattr(message, content_type, body.encode())
+    
+    # Remove spam label from subject
+    if dontspamme.config.spam_label + ' ' in message.subject:
+        message.subject = message.subject.replace(dontspamme.config.spam_label + ' ', '', 1)

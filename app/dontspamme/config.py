@@ -8,6 +8,6 @@ spam_label = '(SPAM)'
 # CHANGE THESE IF YOU KNOW WHAT YOU'RE DOING
 import os
 
-app = os.getcwd().split('/')[-2]
+app = os.environ['APPLICATION_ID']
 web_domain = app + '.appspot.com'
 mail_domain = app + '.appspotmail.com'

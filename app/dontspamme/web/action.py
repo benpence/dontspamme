@@ -91,6 +91,8 @@ class AddDomainAction(AuthenticatedRequest):
     def post(self, member, variables):
         if 'mask' not in variables or 'domain' not in variables:
             return self.HOME
+        if ' ' in variables['domain']:
+            return self.HOME
 
         # Pseudonym in db?    
         pseudo = model.get(
@@ -157,13 +159,15 @@ class AddPseudonymAction(AuthenticatedRequest):
     def post(self, member, variables):
         if 'domain' not in variables:
             return self.HOME
-        if variables['domain'] == '':
+        
+        domain = variables['domain']
+        if domain == '' or ' ' in domain:
             return self.HOME
             
         # Perform action
         pseudo = model.Pseudonym(
             member=member,
-            domains=[variables['domain'].lower()],
+            domains=[domain.lower()],
             mask=util.generate_random_string()
         )
         pseudo.put()
@@ -171,7 +175,7 @@ class AddPseudonymAction(AuthenticatedRequest):
         logging.info("WEB: %s generated mask '%s' with domain '%s'" % (
             member.user.email(),
             pseudo.mask,
-            variables['domain']
+            domain
         ))
 
 class DeletePseudonymAction(AuthenticatedRequest):
@@ -249,7 +253,7 @@ class AddUserAction(AuthenticatedRequest):
         if 'email' not in variables:
             return '/admin'
         
-        user = User(variables['email'].lower())
+        user = User(variables['email'])
         
         # TODO: Add error checking for non-existent users    
         # User already in db?
@@ -281,7 +285,7 @@ class DeleteUserAction(AuthenticatedRequest):
         # User in db?
         member = model.get(
             model.Member,
-            user=User(variables['email'].lower())
+            user=User(variables['email'])
         )
         if not member:
             return '/admin'

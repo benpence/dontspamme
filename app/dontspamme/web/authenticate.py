@@ -1,6 +1,7 @@
 import os
 import cgi
 import logging
+import re
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -37,10 +38,21 @@ class AuthenticatedRequest(webapp.RequestHandler):
         member = valid_user or self.create_admin_if_needed(current_user)
 
         if not member:
-            if users.is_current_user_admin():
-                member
-            self.redirect(self.EXIT)
-            return
+            user_regex = re.compile(re.escape(current_user.email()), re.IGNORECASE)
+            user_len = len(current_user.email())
+            
+            for m in model.Member.all():
+                # TODO: Look into how this might open a security hole (if it smells like a pig and tastes like a pig, it might be bacon)
+                # Update user references to actual user reference
+                if user_regex.match(m.user.email()) and len(m.user.email()) == user_len:
+                    m.user = current_user
+                    m.put()
+                    member = m
+                    break
+        
+            if not member:
+                self.redirect(self.EXIT)
+                return
         
         return member
 
