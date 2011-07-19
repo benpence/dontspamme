@@ -18,10 +18,10 @@ All Google users.
 
 ### How to use
 #### Install
-Refer to [[Install]]
+Refer to INSTALL.md
 
 #### User's guide
-Refer to [[User's Guide]]
+Refer to USING.md
 
 #### Notes
 * Version 11.7 has not been thoroughly tested. Use at your own risk (although the source code's there for you to examine and modify).
