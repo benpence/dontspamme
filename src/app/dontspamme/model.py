@@ -84,7 +84,7 @@ def constrain(cls, **kwargs):
     return q
 
 def get(cls, count=1, **kwargs):
-    q = query(cls, **kwargs)
+    q = constrain(cls, **kwargs)
     
     if count == 1:
         return q.get()

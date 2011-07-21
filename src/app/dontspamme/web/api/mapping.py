@@ -3,7 +3,7 @@ import logging
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-import dontspamme.web.api.handler as handler
+from dontspamme.web.api import handler
     
 application = webapp.WSGIApplication(
     [
@@ -11,12 +11,12 @@ application = webapp.WSGIApplication(
         ('/api/member\?.*', handler.MemberHandler),
         ('/api/member/?', handler.MemberHandler),
         ('/api/member/(.+)/?', handler.MemberHandler),
-        
+
         # Pseudonym
         ('/api/pseudonym\?.*', handler.PseudonymHandler),
         ('/api/pseudonym/?', handler.PseudonymHandler),
         ('/api/pseudonym/(.+)/?', handler.PseudonymHandler),
-        
+
         # Domain
         ('/api/domain/(.+)/?', handler.DomainHandler),
     ],

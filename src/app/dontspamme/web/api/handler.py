@@ -3,12 +3,10 @@ import re
 
 from google.appengine.ext import webapp
 
-import dontsspamme.util as util
+import dontspamme.util as util
 import dontspamme.model as model
-import dontspamme.web.api.decorate as decorate
-from dontspamme.web.api.meta import save_child_methods
-import dontspamme.web.api.constraint as constraint
-import dontspamme.web.api.exception as exception
+from dontspamme.web.api import exception, constraint, decorate
+from dontspamme.web.api.meta import APIHandlerFactory
 
 class APIHandler(webapp.RequestHandler):
     """
@@ -17,7 +15,7 @@ class APIHandler(webapp.RequestHandler):
     __metaclass__ = APIHandlerFactory
     
     def writeout(self, dictionary):
-        self.request.out.write(json.dumps(dictionary))
+        self.response.out.write(json.dumps(dictionary))
 
     def error(self, message):
         self.writeout({'error': message})
@@ -67,8 +65,8 @@ class MemberHandler(APIHandler):
     
 class PseudonymHandler(APIHandler):
     @decorate.is_member
-    @decorate.read_options('mask', 'domains', 'should_drop', mask=str)
-    def read(self, member, *exposed_arguments, mask=None):
+    @decorate.read_options('mask', 'domains', 'should_drop', mask=constraint.is_of_length(util.DEFAULT_LENGTH))
+    def read(self, member, mask=None, *exposed_arguments):
         return model.get(model.Pseudonym, member=member, mask=mask)
     
     @decorate.is_member
@@ -82,7 +80,7 @@ class PseudonymHandler(APIHandler):
         pseudo.put()
     
     @decorate.is_member    
-    @decorate.write_options(mask=str)
+    @decorate.write_options(mask=constraint.is_of_length(util.DEFAULT_LENGTH))
     def remove(self, member, mask=None):
         pseudo = model.get(
             mask=mask,
@@ -97,7 +95,7 @@ class PseudonymHandler(APIHandler):
         pseudo.delete()
     
     @decorate.is_member    
-    @decorate.write_options(mask=str, should_drop=bool)
+    @decorate.write_options(mask=constraint.is_of_length(util.DEFAULT_LENGTH), should_drop=constraint.is_boolean)
     def drop(self, member, mask=None, should_drop=None):
         pseudo = model.get(
             model.Pseudonym,
@@ -113,7 +111,7 @@ class PseudonymHandler(APIHandler):
 
 class DomainHandler(APIHandler):
     @decorate.is_member
-    @decorate.write_options(mask=str, domain=constraint.is_valid_domain)
+    @decorate.write_options(mask=constraint.is_of_length(util.DEFAULT_LENGTH), domain=constraint.is_valid_domain)
     def add(self, member, mask=None, domain=None):
         pseudo = model.get(
             model.Pseudonym,
@@ -128,7 +126,7 @@ class DomainHandler(APIHandler):
         pseudo.put()
 
     @decorate.is_member
-    @decorate.write_options(mask=str, domain=constraint.is_valid_domain)
+    @decorate.write_options(mask=constraint.is_of_length(util.DEFAULT_LENGTH), domain=constraint.is_valid_domain)
     def remove(self, member, mask=None, domain=None):
         pseudo = model.get(
             model.Pseudonym,

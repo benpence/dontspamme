@@ -1,4 +1,4 @@
-import dontspamme.web.api.exception as exception
+from dontspamme.web.api import exception
 
 def stateless_decorator(decorator):
     """
@@ -9,7 +9,7 @@ def stateless_decorator(decorator):
         def instance_method(self, *instance_args, **instance_kwargs):
             decorator(*((self, decorated_method) + instance_args), **instance_kwargs.items())
         return instance_method
-    return initialized_decorator
+    return decorator_replacement
 
 def stateful_decorator(decorator):
     """
@@ -51,15 +51,16 @@ def read_options(handler, method, member, *exposed_arguments, **optional_filters
         optional_filters: dictionary that specifies the requirements for optionally included filters (server side filtering)
     """
     received_arguments = handler.get_post_dict()
+    handler_name = handler.__class__.__name__
     
     for key, value in received_arguments:
         if key not in optional_filters:
-            raise exception.APIMissingKeyError( , key)
+            raise exception.APIMissingKeyError(handler_name, key)
         
         try:
-            optional_filters[key] = optional_filters[key](value)
+            optional_filters[key] = optional_filters[key](handler_name, key, value)
         except ValueError:
-            raise exception.APIValueError(key, optional_filters[key])
+            raise exception.APIValueError(handler_name, key, optional_filters[key])
             
     method(handler, member, *exposed_arguments, **optional_filters)
 
@@ -73,11 +74,11 @@ def write_options(handler, method, member, **requirements):
 
     for key, value in requirements:
         if key not in received_arguments:
-            raise exception.APIMissingKeyError( , key)
+            raise exception.APIMissingKeyError(handler_name, key)
 
         try:
             received_arguments[key] = requirements[key](value)
         except ValueError:
-            raise exception.APIValueError(key, requirements[key])
+            raise exception.APIValueError(handler, key, requirements[key])
 
     method(handler, member, **requirements)

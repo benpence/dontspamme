@@ -1,14 +1,17 @@
+import logging
+import json
+
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users
 
 import dontspamme.model as model
-from dontspamme.web.api.handler import APIHandler
-from dontspamme.web.authenticate import AuthenticatedRequest
 
 class AuthenticationHandler(webapp.RequestHandler):
     """
     Simply tells a client whether they're logged in, a member, or neither
     """
-    def read(self):
+    def get(self):
         user = users.get_current_user()
         
         if not user:
@@ -19,10 +22,14 @@ class AuthenticationHandler(webapp.RequestHandler):
         else:
             output = '<<OUTPUT_USER>>'
 
-        self.writeout({'status': output})
+        self.response.out.write(
+            json.dumps(
+                {'status': output}
+            )
+        ) 
 
 application = webapp.WSGIApplication(
-    [('/api/', handler.AuthenticationHandler)],
+    [('/api/', AuthenticationHandler)],
     debug=True
 )
 

@@ -12,7 +12,7 @@ SPAM_SUBJECT_PREFIX,        (SPAM),                 app dontspamme config.py
 # EVERYTHING BELOW DOES NOT NEED TO BE CHANGED
 
 # Random string length for pseudonyms and contacts
-RANDOM_STRING_LENGTH,       16,                     app dontspamme model.py
+RANDOM_STRING_LENGTH,       16,                     app dontspamme util.py
 
 # Email Hyperlink DOM Node class
 EMAIL_LINK_CLASS,           remove_this,            app dontspamme mail __init__.py
@@ -28,4 +28,4 @@ OUTPUT_MEMBER,              member,                 app dontspamme web api authe
 OUTPUT_MEMBER,              member,                 extension dontspamme js dontspamme.Connection.js
 
 # Metaclass attribute name for dictionary of all 'new' methods in subclass
-CHILD_METHODS_NAME          __child_methods__,      app dontspamme web api meta.py
+CHILD_METHODS_NAME,         __child_methods__,      app dontspamme web api meta.py
