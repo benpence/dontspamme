@@ -1,13 +1,12 @@
 import os
 
 # Where non-users are referred to if they're logged in
-referral_for_non_users = "www.google.com" 
+referral_for_non_users = "<<REFERRAL_FOR_NON_USERS>>" 
 
 # The subject-prefix of messages that have been flagged as spam
-spam_label = '(SPAM)' 
+spam_label = '<<SPAM_SUBJECT_PREFIX>>'
 
-
-# CHANGE THESE IF YOU KNOW WHAT YOU'RE DOING
+# App domains
 app = os.getcwd().split('/')[-2]
 
 DEBUG = True

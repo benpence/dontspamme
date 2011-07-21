@@ -1,10 +1,21 @@
 # Variable                  Value                   Path
 
-APP_ID,                     xxx,             app app.yaml
+APP_ID,                     dontspamme,             app app.yaml
 APP_VERSION,                11-8,                   app app.yaml
+
+REFERRAL_FOR_NON_USERS,     www.google.com,         app dontspamme config.py
+SPAM_SUBJECT_PREFIX,        (SPAM),                 app dontspamme config.py
+
+
 
 
 # EVERYTHING BELOW DOES NOT NEED TO BE CHANGED
+
+# Random string length for pseudonyms and contacts
+RANDOM_STRING_LENGTH,       16,                     app dontspamme model.py
+
+# Email Hyperlink DOM Node class
+EMAIL_LINK_CLASS,           remove_this,            app dontspamme mail __init__.py
 
 # App<->Extension checking authentication
 OUTPUT_NONE,                none,                   app dontspamme web api authenticate.py
@@ -15,3 +26,6 @@ OUTPUT_USER,                user,                   extension dontspamme js dont
 
 OUTPUT_MEMBER,              member,                 app dontspamme web api authenticate.py
 OUTPUT_MEMBER,              member,                 extension dontspamme js dontspamme.Connection.js
+
+# Metaclass attribute name for dictionary of all 'new' methods in subclass
+CHILD_METHODS_NAME          __child_methods__,      app dontspamme web api meta.py

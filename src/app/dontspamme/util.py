@@ -3,7 +3,7 @@ import random
 import re
 import cgi
 
-DEFAULT_LENGTH = 16
+DEFAULT_LENGTH = <<RANDOM_STRING_LENGTH>>
 
 def generate_random_string(length=DEFAULT_LENGTH, alphabet=string.lowercase+string.digits):
     """

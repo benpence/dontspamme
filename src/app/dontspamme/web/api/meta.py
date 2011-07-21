@@ -1,6 +1,6 @@
 from types import FunctionType
 
-CHILD_METHODS_NAME = '__child_methods__'
+CHILD_METHODS_NAME = '<<CHILD_METHODS_NAME>>'
 
 class APIHandlerFactory(type):
     """
