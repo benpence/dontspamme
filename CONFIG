@@ -1,0 +1,17 @@
+# Variable                  Value                   Path
+
+APP_ID,                     xxx,             app app.yaml
+APP_VERSION,                11-8,                   app app.yaml
+
+
+# EVERYTHING BELOW DOES NOT NEED TO BE CHANGED
+
+# App<->Extension checking authentication
+OUTPUT_NONE,                none,                   app dontspamme web api authenticate.py
+OUTPUT_NONE,                none,                   extension dontspamme js dontspamme.Connection.js
+
+OUTPUT_USER,                user,                   app dontspamme web api authenticate.py
+OUTPUT_USER,                user,                   extension dontspamme js dontspamme.Connection.js
+
+OUTPUT_MEMBER,              member,                 app dontspamme web api authenticate.py
+OUTPUT_MEMBER,              member,                 extension dontspamme js dontspamme.Connection.js

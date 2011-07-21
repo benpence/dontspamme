@@ -36,16 +36,8 @@ class APIHandlerFactory(type):
             return self.error("This object cannot be read")
 
         # Construct results tree
-        self.write(
-            dict((
-                # Each object
-                (result.key(), dict((
-                    # Each object attribute
-                    (exposed_value, str(getattr(result, exposed_value)))
-                    for exposed_value in exposed_values
-                )))
-                for result in results
-            ))
+        self.writeout(
+            self.make_results_tree(results, exposed_values)
         )
         
     def post(self, action):
@@ -55,11 +47,18 @@ class APIHandlerFactory(type):
 
         # Modify object    
         try:
-            child_methods[action](self)
+            results, exposed_values = child_methods[action](self)
 
         # APIErrors are caught
         except APIError, e:
             logging.debug(e)
             return self.error(e)
-
-        self.write({'message': 'Completed successfully'})
+        
+        # No results returned
+        except TypeError:
+            return self.writeout({'message': 'Completed successfully'})
+            
+            
+        self.writeout(
+            self.make_results_tree(results, exposed_values)
+        )

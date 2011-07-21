@@ -1,6 +1,8 @@
 import json
 import re
 
+from google.appengine.ext import webapp
+
 import dontsspamme.util as util
 import dontspamme.model as model
 import dontspamme.web.api.decorate as decorate
@@ -8,18 +10,29 @@ from dontspamme.web.api.meta import save_child_methods
 import dontspamme.web.api.constraint as constraint
 import dontspamme.web.api.exception as exception
 
-class APIHandler(object):
+class APIHandler(webapp.RequestHandler):
     """
     Metaclass redirects post requests to the appropriate method in the handler
     """
     __metaclass__ = APIHandlerFactory
     
-    def write(self, dictionary):
+    def writeout(self, dictionary):
         self.request.out.write(json.dumps(dictionary))
 
     def error(self, message):
-        self.write({'error': message})
+        self.writeout({'error': message})
     
+    def make_results_tree(results, exposed_values):
+        return dict((
+            # Each object
+            (result.key(), dict((
+                # Each object attribute
+                (exposed_value, str(getattr(result, exposed_value)))
+                for exposed_value in exposed_values
+            )))
+            for result in results
+        ))
+            
 class MemberHandler(APIHandler):
     @decorate.is_admin
     @decorate.read_options('user')

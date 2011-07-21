@@ -1,17 +1,14 @@
 {
     "name": "dontspamme",
-    "version": "11.7",
-    "description": "Works in coordination with Google App Engine to help you flag spam and protect your email.",
-    "icons": {
-         "128": "icon_128.png"
-    },
-    "background_page": "bg.html",
+    "version": "11.8",
+    "description": "",
+    "background_page": "background.html",
     "permissions": [
-        "http://*.appspot.com/*",
-        "https://*.appspot.com/*",
         "tabs",
+        "http://*.appspot.com/"
+        "https://*.appspot.com/"
     ],
-    "content_scripts": [{
+    /*"content_scripts": [{
         "matches": [
             "http://www.google.com/*"
         ],
@@ -19,5 +16,10 @@
             "dontspamme.extension.js",
             "dontspamme.extension.page.js"
         ]
-    }],
+    }],*/
+    "browser_action": {
+        "name": "Generate a new Pseudonym",
+        "default_icon": "icon.png",
+        "popup": "popup.html"
+    },
 }

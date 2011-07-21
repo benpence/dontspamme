@@ -1,4 +1,8 @@
 #!/bin/bash
+python setup.py install
+
 dev_appserver.py \
     --datastore_path=`pwd`/scripts/datastore.rdbms \
-    app/
+    src/app/
+
+python setup.py uninstall
