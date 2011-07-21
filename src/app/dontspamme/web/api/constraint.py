@@ -1,5 +1,7 @@
 import re
 
+from dontspamme.web.api import exception
+
 DOMAIN_REGEX = re.compile('[a-zA-Z0-9_\-]+(\.[a-zA-Z0-9_\-]+)+')
 def is_valid_domain(handler, key_name, domain):
     if not DOMAIN_REGEX.match(domain):

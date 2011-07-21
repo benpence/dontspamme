@@ -8,14 +8,12 @@ from dontspamme.web.api import handler
 application = webapp.WSGIApplication(
     [
         # Member
-        ('/api/member\?.*', handler.MemberHandler),
-        ('/api/member/?', handler.MemberHandler),
-        ('/api/member/(.+)/?', handler.MemberHandler),
+        (r'/api/member/(.+)/?', handler.MemberHandler),
+        (r'/api/member', handler.MemberHandler),        
 
         # Pseudonym
-        ('/api/pseudonym\?.*', handler.PseudonymHandler),
-        ('/api/pseudonym/?', handler.PseudonymHandler),
-        ('/api/pseudonym/(.+)/?', handler.PseudonymHandler),
+        (r'/api/pseudonym/(.+)/?', handler.PseudonymHandler),
+        (r'/api/pseudonym', handler.PseudonymHandler),
 
         # Domain
         ('/api/domain/(.+)/?', handler.DomainHandler),

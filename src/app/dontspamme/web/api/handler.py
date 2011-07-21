@@ -1,14 +1,16 @@
 import json
 import re
+import logging
 
 from google.appengine.ext import webapp
 
 import dontspamme.util as util
 import dontspamme.model as model
+from dontspamme.web.authenticate import AuthenticatedRequest
 from dontspamme.web.api import exception, constraint, decorate
 from dontspamme.web.api.meta import APIHandlerFactory
 
-class APIHandler(webapp.RequestHandler):
+class APIHandler(AuthenticatedRequest):
     """
     Metaclass redirects post requests to the appropriate method in the handler
     """
@@ -20,13 +22,13 @@ class APIHandler(webapp.RequestHandler):
     def error(self, message):
         self.writeout({'error': message})
     
-    def make_results_tree(results, exposed_values):
+    def make_results_tree(self, results, exposed_arguments):
         return dict((
             # Each object
-            (result.key(), dict((
+            (str(result.key()), dict((
                 # Each object attribute
-                (exposed_value, str(getattr(result, exposed_value)))
-                for exposed_value in exposed_values
+                (exposed_argument, str(getattr(result, exposed_argument)))
+                for exposed_argument in exposed_arguments
             )))
             for result in results
         ))
@@ -35,7 +37,7 @@ class MemberHandler(APIHandler):
     @decorate.is_admin
     @decorate.read_options('user')
     def read(self, member, *exposed_arguments):
-        return model.Member.all()
+        self.output = model.Member.all(), exposed_arguments
     
     @decorate.is_admin
     @decorate.write_options(email=constraint.is_valid_email)
@@ -66,8 +68,8 @@ class MemberHandler(APIHandler):
 class PseudonymHandler(APIHandler):
     @decorate.is_member
     @decorate.read_options('mask', 'domains', 'should_drop', mask=constraint.is_of_length(util.DEFAULT_LENGTH))
-    def read(self, member, mask=None, *exposed_arguments):
-        return model.get(model.Pseudonym, member=member, mask=mask)
+    def read(self, member, *exposed_arguments, **filters):
+        self.output = model.get(model.Pseudonym, count=0, member=member, **filters), exposed_arguments
     
     @decorate.is_member
     @decorate.write_options(domain=constraint.is_valid_domain)

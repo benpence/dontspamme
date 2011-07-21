@@ -4,16 +4,16 @@ from types import FunctionType
 from dontspamme.web.api import exception
 
 CHILD_METHODS_NAME = '<<CHILD_METHODS_NAME>>'
-
 def get(self):
     """
     Catches errors in get requests and reports them to client on 'get' requests
     """
     try:
-        results, exposed_values = self.read()
+        self.read()
 
     # APIErrors are caught    
     except exception.APIError as e:
+        logging.debug(e)
         return self.error(e.value)
     
     # No read method
@@ -22,7 +22,7 @@ def get(self):
 
     # Construct results tree
     self.writeout(
-        self.make_results_tree(results, exposed_values)
+        self.make_results_tree(*self.output)
     )
     
 def post(self, action):
@@ -32,7 +32,7 @@ def post(self, action):
 
     # Modify object    
     try:
-        results, exposed_values = child_methods[action](self)
+        child_methods[action](self)
 
     # APIErrors are caught
     except exception.APIError, e:
@@ -40,13 +40,7 @@ def post(self, action):
         return self.error(e)
     
     # No results returned
-    except TypeError:
-        return self.writeout({'message': 'Completed successfully'})
-        
-        
-    self.writeout(
-        self.make_results_tree(results, exposed_values)
-    )
+    self.writeout({'message': 'Completed successfully'})
 
 class APIHandlerFactory(type):
     """

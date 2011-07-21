@@ -7,7 +7,7 @@ def stateless_decorator(decorator):
     """
     def decorator_replacement(decorated_method):
         def instance_method(self, *instance_args, **instance_kwargs):
-            decorator(*((self, decorated_method) + instance_args), **instance_kwargs.items())
+            decorator(*((self, decorated_method) + instance_args), **instance_kwargs)
         return instance_method
     return decorator_replacement
 
@@ -51,18 +51,18 @@ def read_options(handler, method, member, *exposed_arguments, **optional_filters
         optional_filters: dictionary that specifies the requirements for optionally included filters (server side filtering)
     """
     received_arguments = handler.get_post_dict()
-    handler_name = handler.__class__.__name__
+    filters = {}
     
-    for key, value in received_arguments:
-        if key not in optional_filters:
-            raise exception.APIMissingKeyError(handler_name, key)
+    for key, value in optional_filters.items():
+        if key not in received_arguments:
+            continue
         
         try:
-            optional_filters[key] = optional_filters[key](handler_name, key, value)
+            filters[key] = optional_filters[key](handler, key, received_arguments[key])
         except ValueError:
             raise exception.APIValueError(handler_name, key, optional_filters[key])
             
-    method(handler, member, *exposed_arguments, **optional_filters)
+    method(handler, member, *exposed_arguments, **filters)
 
 @stateful_decorator
 def write_options(handler, method, member, **requirements):
@@ -72,9 +72,9 @@ def write_options(handler, method, member, **requirements):
     """
     received_arguments = handler.get_post_dict()
 
-    for key, value in requirements:
+    for key, value in requirements.items():
         if key not in received_arguments:
-            raise exception.APIMissingKeyError(handler_name, key)
+            raise exception.APIMissingKeyError(handler, key)
 
         try:
             received_arguments[key] = requirements[key](value)
