@@ -1,3 +1,7 @@
+"""
+Constraints for query values.
+Return python-equivalent value from the str or raises an APIConstraintError with problem
+"""
 import re
 
 from dontspamme.web.api import exception
@@ -25,7 +29,7 @@ def is_valid_email(handler, key_name, address):
     return address
 
 def is_of_length(length):
-    def corrent_length(handler, key_name, value):
+    def correct_length(handler, key_name, value):
         try:
             if len(value) != length:
                 raise exception.APIConstraintError(
@@ -43,7 +47,7 @@ def is_of_length(length):
             
         return value
         
-    return corrent_length
+    return correct_length
     
 def is_boolean(handler, key_name, value):
     if value in ('True', 'true'):

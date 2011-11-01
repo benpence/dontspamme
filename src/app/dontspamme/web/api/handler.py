@@ -1,3 +1,7 @@
+"""
+API Handlers. Class methods are exposed API 
+"""
+
 import json
 import re
 import logging

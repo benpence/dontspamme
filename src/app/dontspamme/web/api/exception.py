@@ -1,3 +1,7 @@
+"""
+When these errors are raised, the handler returns the message to the client.
+"""
+
 class APIError(Exception):
     def __init__(self, value):
         self.value = value

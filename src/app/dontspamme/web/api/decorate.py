@@ -1,3 +1,7 @@
+"""
+Decorators for describing handler functions.
+"""
+
 from dontspamme.web.api import exception
 
 def stateless_decorator(decorator):
@@ -27,6 +31,9 @@ def stateful_decorator(decorator):
 
 @stateless_decorator
 def is_admin(handler, method):
+	"""
+	Requires that the member (not Google user) is an admin.
+	"""
     member = handler.get_admin_member()
     if not member:
         raise exception.APIAuthorizationError()
@@ -35,6 +42,9 @@ def is_admin(handler, method):
 
 @stateless_decorator    
 def is_member(handler, method):
+	"""
+	Requires app membership.
+	"""
     member = handler.get_valid_member()
     if not member:
         raise exception.APIAuthorizationError()
@@ -47,8 +57,8 @@ def read_options(handler, method, member, *exposed_arguments, **optional_filters
     Decorator for retrieving objects from the database
     
     Args:
-        exposed_arguments: tuple that contains attributes to be returned to client
-        optional_filters: dictionary that specifies the requirements for optionally included filters (server side filtering)
+        exposed_arguments {tuple}: contains attributes to be returned to client
+        optional_filters {dict}: that specifies the requirements for optionally included filters (server side filtering)
     """
     received_arguments = handler.get_post_dict()
     filters = {}
@@ -68,7 +78,7 @@ def read_options(handler, method, member, *exposed_arguments, **optional_filters
 def write_options(handler, method, member, **requirements):
     """
     Args:
-        requirements: dict of argument name to a method that checks and converts its type for accessing/modifying the app
+        requirements {dict}: argument_name => constraint_method, checks and converts its type for accessing/modifying the app
     """
     received_arguments = handler.get_post_dict()
 

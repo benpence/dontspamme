@@ -1,3 +1,7 @@
+"""
+Class factory (metaclass) for APIHandlers. Takes all methods defined in child classes and exposes them to client.
+"""
+
 import logging
 from types import FunctionType
 
@@ -6,7 +10,7 @@ from dontspamme.web.api import exception
 CHILD_METHODS_NAME = '<<CHILD_METHODS_NAME>>'
 def get(self):
     """
-    Catches errors in get requests and reports them to client on 'get' requests
+    Catches errors in get requests
     """
     try:
         self.read()
@@ -26,6 +30,9 @@ def get(self):
     )
     
 def post(self, action):
+	"""
+    Catches errors in post requests
+    """
     child_methods = getattr(self, CHILD_METHODS_NAME)
     if action not in child_methods:
         return self.error("Invalid action '%s'" % action)

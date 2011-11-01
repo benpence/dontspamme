@@ -1,7 +1,7 @@
 import os
 import sys
 
-SOURCE_PATH = os.path.join(os.getcwd(),'src')
+SOURCE_PATH = os.path.join(os.getcwd(), 'src')
 
 ENV_VARS_PATH = 'CONFIG'
 ENV_VARS_PADDING = "<<%s>>"

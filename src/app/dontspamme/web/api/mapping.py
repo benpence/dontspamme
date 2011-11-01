@@ -1,3 +1,7 @@
+"""
+URL Mapping for API calls
+"""
+
 import logging
 
 from google.appengine.ext import webapp

@@ -1,3 +1,7 @@
+"""
+Tell client if they're (1) logged in and/or (2) a valid user
+"""
+
 import logging
 import json
 
@@ -14,19 +18,24 @@ class AuthenticationHandler(webapp.RequestHandler):
     def get(self):
         user = users.get_current_user()
         
+		# Not logged in to Google
         if not user:
             output = '<<OUTPUT_NONE>>'
-            
+           
+		# Not a member of this app
         elif model.get(model.Member, user=user):
             output = '<<OUTPUT_MEMBER>>'
+
+		# All good
         else:
             output = '<<OUTPUT_USER>>'
 
+		# Tell client
         self.response.out.write(
             json.dumps(
                 {'status': output}
             )
-        ) 
+        )
 
 application = webapp.WSGIApplication(
     [('/api/', AuthenticationHandler)],
